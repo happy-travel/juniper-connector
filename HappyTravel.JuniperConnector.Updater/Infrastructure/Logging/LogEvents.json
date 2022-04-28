@@ -1,0 +1,38 @@
+[
+  {
+    "id": 40001,
+    "name": "StartedWorker",
+    "level": "Information",
+    "template": "Started worker '{workerName}'",
+    "argumentTypes": [ "string" ]
+  },
+  {
+    "id": 40002,
+    "name": "FinishedWorker",
+    "level": "Information",
+    "template": "Finished worker '{workerName}'",
+    "argumentTypes": [ "string" ]
+  },
+  {
+    "id": 40003,
+    "name": "CancellingOperation",
+    "level": "Error",
+    "template": "Cancelling operation '{operationName}'",
+    "argumentTypes": [ "string" ]
+  },
+  {
+    "id": 40004,
+    "name": "StaticDataUpdateHostedServiceException",
+    "level": "Error",
+    "template": "Updater: ",
+    "argumentTypes": [],
+    "hasException": true
+  },
+  {
+    "id": 40005,
+    "name": "StoppingOperation",
+    "level": "Information",
+    "template": "Stopping operation '{operationName}'",
+    "argumentTypes": [ "string" ]
+  }
+]
