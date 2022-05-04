@@ -1,0 +1,32 @@
+﻿{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:35395",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "HappyTravel.JuniperConnector.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Local",
+        "HTDC_GRPC_PORT": "5163",
+        "HTDC_METRICS_PORT": "60001",
+        "HTDC_WEBAPI_PORT": "5162",
+        "HTDC_HEALTH_PORT": "60000"
+      },
+      "applicationUrl": "http://localhost:5159",
+      "dotnetRunMessages": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
