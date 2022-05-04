@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HappyTravel.JuniperConnecto
 		{CE62A396-99D7-4EDA-99F6-D5214EA749B5} = {CE62A396-99D7-4EDA-99F6-D5214EA749B5}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyTravel.JuniperConnector.Common", "HappyTravel.JuniperConnector.Common\HappyTravel.JuniperConnector.Common.csproj", "{EABC318A-2137-46FB-BD00-26A800ADE733}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HappyTravel.JuniperConnector.Common", "HappyTravel.JuniperConnector.Common\HappyTravel.JuniperConnector.Common.csproj", "{EABC318A-2137-46FB-BD00-26A800ADE733}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyTravel.JuniperConnector.Data", "HappyTravel.JuniperConnector.Data\HappyTravel.JuniperConnector.Data.csproj", "{CE62A396-99D7-4EDA-99F6-D5214EA749B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HappyTravel.JuniperConnector.Data", "HappyTravel.JuniperConnector.Data\HappyTravel.JuniperConnector.Data.csproj", "{CE62A396-99D7-4EDA-99F6-D5214EA749B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyTravel.JuniperConnector.Api", "HappyTravel.JuniperConnector.Api\HappyTravel.JuniperConnector.Api.csproj", "{DF0BBA6A-F72B-4F95-BB09-8CB5DFF76A04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{CE62A396-99D7-4EDA-99F6-D5214EA749B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE62A396-99D7-4EDA-99F6-D5214EA749B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE62A396-99D7-4EDA-99F6-D5214EA749B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF0BBA6A-F72B-4F95-BB09-8CB5DFF76A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF0BBA6A-F72B-4F95-BB09-8CB5DFF76A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF0BBA6A-F72B-4F95-BB09-8CB5DFF76A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF0BBA6A-F72B-4F95-BB09-8CB5DFF76A04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
