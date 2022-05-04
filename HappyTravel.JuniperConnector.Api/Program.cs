@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using HappyTravel.BaseConnector.Api.Infrastructure.Extensions;
 
 namespace HappyTravel.JuniperConnector.Api;
 
@@ -15,33 +16,37 @@ public class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>()
-                // ToDo: use BaseConnector
-                .UseDefaultServiceProvider(s =>
-                {
-                    s.ValidateScopes = true;
-                    s.ValidateOnBuild = true;
-                })
-                .UseSentry(options =>
-                {
-                    options.Dsn = Environment.GetEnvironmentVariable("HTDC_JUNIPER_SENTRY_ENDPOINT");
-                    options.Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                    options.IncludeActivityData = true;
-                    options.BeforeSend = sentryEvent =>
+                    .UseKestrel(options =>
                     {
-                        if (Activity.Current is null)
+                        options.ConfigureBaseConnector();
+                    })
+                    .UseDefaultServiceProvider(s =>
+                    {
+                        s.ValidateScopes = true;
+                        s.ValidateOnBuild = true;
+                    })
+                    .UseSentry(options =>
+                    {
+                        options.Dsn = Environment.GetEnvironmentVariable("HTDC_JUNIPER_SENTRY_ENDPOINT");
+                        options.Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                        options.IncludeActivityData = true;
+                        options.BeforeSend = sentryEvent =>
+                        {
+                            if (Activity.Current is null)
+                                return sentryEvent;
+
+                            foreach (var (key, value) in Activity.Current.Baggage)
+                                sentryEvent.SetTag(key, value ?? string.Empty);
+
+                            sentryEvent.SetTag("TraceId", Activity.Current.TraceId.ToString());
+                            sentryEvent.SetTag("SpanId", Activity.Current.SpanId.ToString());
+
                             return sentryEvent;
+                        };
+                    });
+            })
+            .ConfigureBaseConnector(ConnectorName);
 
-                        foreach (var (key, value) in Activity.Current.Baggage)
-                            sentryEvent.SetTag(key, value ?? string.Empty);
-
-                        sentryEvent.SetTag("TraceId", Activity.Current.TraceId.ToString());
-                        sentryEvent.SetTag("SpanId", Activity.Current.SpanId.ToString());
-
-                        return sentryEvent;
-                    };
-                });
-            });
-        // ToDo: use BaseConnector
 
 
     public const string ConnectorName = "juniper-connector";
