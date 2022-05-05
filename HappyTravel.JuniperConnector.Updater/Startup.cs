@@ -1,8 +1,11 @@
 ﻿
 using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Common.Infrastructure.Environment;
+using HappyTravel.JuniperConnector.Common.JuniperService;
+using HappyTravel.JuniperConnector.Common.Settings;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Updater.Infrastructure;
+using HappyTravel.JuniperConnector.Updater.Workers;
 using HappyTravel.VaultClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,9 +33,13 @@ public class Startup
         });
 
         vaultClient.Login(EnvironmentVariableHelper.Get("Vault:Token", Configuration), LoginMethods.Token)?.GetAwaiter().GetResult();
-        
-        
-        services.AddTransient<JuniperSerializer>();        
+        var apiConnectionOptions = vaultClient.Get("juniper-connector/api-connection").GetAwaiter().GetResult();
+
+        services.AddTransient<JuniperSerializer>();
+        services.AddTransient<JuniperContext>();
+        services.AddTransient<ZoneLoader>();
+
+        services.AddTransient<IJuniperServiceClient, JuniperServiceClient>();
 
         services.AddHostedService<StaticDataUpdateHostedService>();
         services.AddTransient<DateTimeProvider>();
@@ -40,7 +47,15 @@ public class Startup
         ConfigureDatabaseOptions(services, vaultClient);
         ConfigureWorkers(services);
 
-        services.AddHealthChecks();        
+        services.AddHealthChecks();
+
+        services.Configure<ApiConnectionSettings>(options =>
+        {
+            options.StaticDataEndPoint = apiConnectionOptions["staticDataEndPoint"];
+            options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
+            options.Email = apiConnectionOptions["email"];
+            options.Password = apiConnectionOptions["password"];
+        });
     }
 
 
@@ -49,13 +64,14 @@ public class Startup
         var workersToRun = Configuration.GetSection("Workers:WorkersToRun").Value;
         if (string.IsNullOrWhiteSpace(workersToRun))
         {
-            
+            services.AddTransient<IUpdateWorker, ZoneLoader>();
         }
         else
         {
             foreach (var workerName in workersToRun.Split(';').Select(s => s.Trim()))
             {
-                
+                if (workerName == nameof(ZoneLoader))
+                    services.AddTransient<IUpdateWorker, ZoneLoader>();
             }
         }
     }
