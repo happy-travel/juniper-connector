@@ -11,9 +11,11 @@ namespace HappyTravel.JuniperConnector.Updater.Workers;
 
 public class ZoneLoader : IUpdateWorker
 {
-    public ZoneLoader()
+    public ZoneLoader(IJuniperServiceClient client, ILogger<ZoneLoader> logger, JuniperContext context)
     {
-
+        _client = client;
+        _logger = logger;
+        _context = context;
     }
 
 
@@ -27,10 +29,10 @@ public class ZoneLoader : IUpdateWorker
             var zones = await _client.GetZoneList();
 
             await _context.Zones.AddRangeAsync(zones.Where(c => !zoneCodes.Contains(c.Code))
-                                                    .Select(c => ConvertToCountryEntity(c)));
+                                                    .Select(c => ConvertToZoneEntity(c)));
 
             _context.Zones.UpdateRange(zones.Where(c => zoneCodes.Contains(c.Code))
-                                            .Select(c => ConvertToCountryEntity(c)));
+                                            .Select(c => ConvertToZoneEntity(c)));
         }
         catch (Exception ex)
         {
@@ -42,7 +44,7 @@ public class ZoneLoader : IUpdateWorker
     }
 
 
-    private Zone ConvertToCountryEntity(JP_Zone zone)
+    private Zone ConvertToZoneEntity(JP_Zone zone)
         => new Zone
         {
             Code = zone.Code,
@@ -53,6 +55,5 @@ public class ZoneLoader : IUpdateWorker
 
     private readonly IJuniperServiceClient _client;
     private readonly ILogger<ZoneLoader> _logger;
-    private readonly JuniperContext _context;
-    private readonly JuniperSerializer _bronevikSerializer;
+    private readonly JuniperContext _context;    
 }
