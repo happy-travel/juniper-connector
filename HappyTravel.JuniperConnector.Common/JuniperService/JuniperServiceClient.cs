@@ -44,14 +44,14 @@ public class JuniperServiceClient : IJuniperServiceClient
 
 
     private BasicHttpBinding GetBasicHttpBinding(string name)
-            => new BasicHttpBinding(BasicHttpSecurityMode.Transport)
-            {
-                Name = name,
-                MaxReceivedMessageSize = 20000000,
-                MaxBufferPoolSize = 20000000,
-                MaxBufferSize = 20000000,
-                SendTimeout = TimeSpan.FromMinutes(5)
-            };
+        => new BasicHttpBinding(BasicHttpSecurityMode.Transport)
+        {
+            Name = name,
+            MaxReceivedMessageSize = MaxReceivedMessageSize,
+            MaxBufferPoolSize = MaxBufferPoolSize,
+            MaxBufferSize = MaxBufferSize,
+            SendTimeout = TimeSpan.FromMinutes(5)
+        };
 
 
     private EndpointAddress GetEndpointAddress(string endPoint)
@@ -59,11 +59,16 @@ public class JuniperServiceClient : IJuniperServiceClient
 
 
     private JP_Login GetLogin()
-            => new JP_Login
-            {
-                Email = _options.Email,
-                Password = _options.Password
-            };    
+        => new JP_Login
+        {
+            Email = _options.Email,
+            Password = _options.Password
+        };
+
+
+    private const long MaxReceivedMessageSize = 20000000;
+    private const long MaxBufferPoolSize = 20000000;
+    private const int MaxBufferSize = 20000000;
 
 
     private readonly StaticDataTransactionsClient _staticDataClient;
