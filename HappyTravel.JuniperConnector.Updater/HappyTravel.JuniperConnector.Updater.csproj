@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="HappyTravel.ConsulKeyValueClient.ConfigurationProvider" Version="1.6.3" />
-    <PackageReference Include="HappyTravel.StdOutLogger" Version="1.7.0" />
+    <PackageReference Include="HappyTravel.StdOutLogger" Version="1.7.1" />
   </ItemGroup>
 
   <ItemGroup>
