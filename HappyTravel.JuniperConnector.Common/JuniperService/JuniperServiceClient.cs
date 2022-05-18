@@ -1,8 +1,7 @@
-﻿using HappyTravel.JuniperConnector.Common.Settings;
+﻿using HappyTravel.JuniperConnector.Common.Infrastructure;
+using HappyTravel.JuniperConnector.Common.Settings;
 using JuniperServiceReference;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.ServiceModel;
 
 namespace HappyTravel.JuniperConnector.Common.JuniperService;
 
@@ -11,27 +10,10 @@ public class JuniperServiceClient : IJuniperServiceClient
     public JuniperServiceClient(IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options)
     {
         _options = options.Value;
-        _staticDataClient = new StaticDataTransactionsClient(GetBasicHttpBinding("JuniperStaticDataServiceSoap"), GetEndpointAddress(_options.StaticDataEndPoint));
-        _staticDataClient.Endpoint.EndpointBehaviors.Add(new HttpMessageHandlerBehavior(factory, Constants.HttpStaticDataClientNames));
-        _availClient = new AvailTransactionsClient(GetBasicHttpBinding("JuniperAvailServiceSoap"), GetEndpointAddress(_options.AvailEndPoint));
-        _availClient.Endpoint.EndpointBehaviors.Add(new HttpMessageHandlerBehavior(factory, Constants.HttpAvailClientNames));
+        _staticDataClient = InitializeStaticDataClient(factory);        
+        _availClient = InitializeAvailClient(factory);
         _login = GetLogin();
     }
-
-
-    private BasicHttpBinding GetBasicHttpBinding(string name)
-        => new BasicHttpBinding(BasicHttpSecurityMode.Transport)
-        {
-            Name = name,
-            MaxReceivedMessageSize = MaxReceivedMessageSize,
-            MaxBufferPoolSize = MaxBufferPoolSize,
-            MaxBufferSize = MaxBufferSize,
-            SendTimeout = TimeSpan.FromMinutes(5)
-        };
-
-
-    private EndpointAddress GetEndpointAddress(string endPoint)
-        => new EndpointAddress(new Uri(endPoint));
 
 
     private JP_Login GetLogin()
@@ -42,9 +24,22 @@ public class JuniperServiceClient : IJuniperServiceClient
         };
 
 
-    private const long MaxReceivedMessageSize = 20000000;
-    private const long MaxBufferPoolSize = 20000000;
-    private const int MaxBufferSize = 20000000;
+    public StaticDataTransactionsClient InitializeStaticDataClient(IHttpMessageHandlerFactory factory)
+        => JuniperServiceExtensions.InitializeClient<StaticDataTransactionsClient, StaticDataTransactions>(
+            client: _staticDataClient,
+            basicHttpBindingName: "JuniperStaticDataServiceSoap",
+            endPoint: _options.StaticDataEndPoint,
+            factory: factory,
+            clientName: Constants.HttpStaticDataClientNames);    
+
+
+    public AvailTransactionsClient InitializeAvailClient(IHttpMessageHandlerFactory factory)
+        => JuniperServiceExtensions.InitializeClient<AvailTransactionsClient, AvailTransactions>(
+            client: _availClient,
+            basicHttpBindingName: "JuniperAvailServiceSoap",
+            endPoint: _options.AvailEndPoint,
+            factory: factory,
+            clientName: Constants.HttpAvailClientNames);    
 
 
     private readonly StaticDataTransactionsClient _staticDataClient;
