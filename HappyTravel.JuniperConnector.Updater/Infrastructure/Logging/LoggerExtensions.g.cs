@@ -20,12 +20,6 @@ public static partial class LoggerExtensions
     [LoggerMessage(40005, LogLevel.Information, "Stopping operation '{operationName}'")]
     static partial void StoppingOperation(ILogger logger, string operationName);
     
-    [LoggerMessage(40006, LogLevel.Information, "Starting raw data zone update")]
-    static partial void StartingZonesUpdate(ILogger logger);
-    
-    [LoggerMessage(40007, LogLevel.Critical, "Zone loader: ")]
-    static partial void ZoneLoaderException(ILogger logger, System.Exception exception);
-    
     
     
     public static void LogStartedWorker(this ILogger logger, string workerName)
@@ -42,10 +36,4 @@ public static partial class LoggerExtensions
     
     public static void LogStoppingOperation(this ILogger logger, string operationName)
         => StoppingOperation(logger, operationName);
-    
-    public static void LogStartingZonesUpdate(this ILogger logger)
-        => StartingZonesUpdate(logger);
-    
-    public static void LogZoneLoaderException(this ILogger logger, System.Exception exception)
-        => ZoneLoaderException(logger, exception);
 }
