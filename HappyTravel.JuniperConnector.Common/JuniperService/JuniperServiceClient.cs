@@ -1,8 +1,7 @@
-﻿using HappyTravel.JuniperConnector.Common.Settings;
+﻿using HappyTravel.JuniperConnector.Common.Infrastructure;
+using HappyTravel.JuniperConnector.Common.Settings;
 using JuniperServiceReference;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.ServiceModel;
 
 namespace HappyTravel.JuniperConnector.Common.JuniperService;
 
@@ -11,29 +10,69 @@ public class JuniperServiceClient : IJuniperServiceClient
     public JuniperServiceClient(IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options)
     {
         _options = options.Value;
-        _staticDataClient = new StaticDataTransactionsClient(GetBasicHttpBinding("JuniperStaticDataServiceSoap"), GetEndpointAddress(_options.StaticDataEndPoint));
-        _staticDataClient.Endpoint.EndpointBehaviors.Add(new HttpMessageHandlerBehavior(factory, Constants.HttpStaticDataClientNames));
-        _availClient = new AvailTransactionsClient(GetBasicHttpBinding("JuniperAvailServiceSoap"), GetEndpointAddress(_options.AvailEndPoint));
-        _availClient.Endpoint.EndpointBehaviors.Add(new HttpMessageHandlerBehavior(factory, Constants.HttpAvailClientNames));
+        _staticDataClient = InitializeStaticDataClient(factory);        
+        _availClient = InitializeAvailClient(factory);
         _login = GetLogin();
     }
+    
 
 
     public async Task<List<JP_Zone>> GetZoneList()
     {
-        var response = await GetZoneListResponse(new JP_ZoneListRQ
+        var request = new JP_ZoneListRQ
         {
-            Language = Constants.DefaultLanguageCode,
-            Login = _login,
             ZoneListRequest = new JP_ZoneListRequest
             {
                 ProductType = JP_ProductType.HOT,
                 ShowIATA = true,
                 MaxLevel = 1
             }
-        });
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetZoneListResponse(request);
 
         return response.ZoneList.ToList();
+    }
+
+
+    public async Task<List<JP_HotelContent>> GetHotelContents(IEnumerable<string> hotelCodes)
+    {
+        var request = new JP_HotelContentRQ
+        {
+            HotelContentList = hotelCodes.Select(x => GetHotelContentRequest(x)).ToArray(),
+            AdvancedOptions = new JP_HotelDataAdvancedOptions
+            {
+                ShowGiataCode = true
+            }
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetHotelContentResponse(request);
+
+        return response.Contents.HotelContent.ToList();
+
+        JP_HotelSimpleContent GetHotelContentRequest(string hotelCode)
+            => new JP_HotelSimpleContent
+            {
+                Code = hotelCode
+            };
+    }
+
+
+    public async Task<JP_HotelPortfolio> GetHotelPortfolio(int recordsPerPage, string nextToken)
+    {
+        var request = new JP_HotelPortfolioRQ
+        {
+            RecordsPerPage = recordsPerPage,
+            RecordsPerPageSpecified = true,
+            Token = nextToken
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetHotelPortfolioResponse(request);
+
+        return response.HotelPortfolio;
     }
 
 
@@ -43,27 +82,42 @@ public class JuniperServiceClient : IJuniperServiceClient
     }
 
 
-    private BasicHttpBinding GetBasicHttpBinding(string name)
-            => new BasicHttpBinding(BasicHttpSecurityMode.Transport)
-            {
-                Name = name,
-                MaxReceivedMessageSize = 20000000,
-                MaxBufferPoolSize = 20000000,
-                MaxBufferSize = 20000000,
-                SendTimeout = TimeSpan.FromMinutes(5)
-            };
+    private async Task<JP_ContentRS> GetHotelContentResponse(JP_HotelContentRQ request)
+    {
+        return await _staticDataClient.HotelContentAsync(request);
+    }
 
 
-    private EndpointAddress GetEndpointAddress(string endPoint)
-        => new EndpointAddress(new Uri(endPoint));
+    private async Task<JP_StaticDataRS> GetHotelPortfolioResponse(JP_HotelPortfolioRQ request)
+    {
+        return await _staticDataClient.HotelPortfolioAsync(request);
+    }    
 
 
     private JP_Login GetLogin()
-            => new JP_Login
-            {
-                Email = _options.Email,
-                Password = _options.Password
-            };    
+        => new JP_Login
+        {
+            Email = _options.Email,
+            Password = _options.Password
+        };
+
+
+    public StaticDataTransactionsClient InitializeStaticDataClient(IHttpMessageHandlerFactory factory)
+        => JuniperServiceExtensions.InitializeClient<StaticDataTransactionsClient, StaticDataTransactions>(
+            client: _staticDataClient,
+            basicHttpBindingName: "JuniperStaticDataServiceSoap",
+            endPoint: _options.StaticDataEndPoint,
+            factory: factory,
+            clientName: Constants.HttpStaticDataClientNames);    
+
+
+    public AvailTransactionsClient InitializeAvailClient(IHttpMessageHandlerFactory factory)
+        => JuniperServiceExtensions.InitializeClient<AvailTransactionsClient, AvailTransactions>(
+            client: _availClient,
+            basicHttpBindingName: "JuniperAvailServiceSoap",
+            endPoint: _options.AvailEndPoint,
+            factory: factory,
+            clientName: Constants.HttpAvailClientNames);    
 
 
     private readonly StaticDataTransactionsClient _staticDataClient;
