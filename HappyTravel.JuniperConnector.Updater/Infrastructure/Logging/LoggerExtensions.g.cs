@@ -38,6 +38,15 @@ public static partial class LoggerExtensions
     [LoggerMessage(40011, LogLevel.Information, "Finish raw data update with id '{updateId}'")]
     static partial void FinishHotelsUpdate(ILogger logger, int updateId);
     
+    [LoggerMessage(40012, LogLevel.Information, "Starting accommodation updater")]
+    static partial void StartingAccommodationUpdater(ILogger logger);
+    
+    [LoggerMessage(40013, LogLevel.Critical, "Accommodation updater: ")]
+    static partial void AccommodationUpdaterException(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40014, LogLevel.Information, "Get hotels from DB. From {i} to {batchSizeInc}")]
+    static partial void AccommodationUpdaterGetHotels(ILogger logger, int i, int batchSizeInc);
+    
     
     
     public static void LogStartedWorker(this ILogger logger, string workerName)
@@ -72,4 +81,13 @@ public static partial class LoggerExtensions
     
     public static void LogFinishHotelsUpdate(this ILogger logger, int updateId)
         => FinishHotelsUpdate(logger, updateId);
+    
+    public static void LogStartingAccommodationUpdater(this ILogger logger)
+        => StartingAccommodationUpdater(logger);
+    
+    public static void LogAccommodationUpdaterException(this ILogger logger, System.Exception exception)
+        => AccommodationUpdaterException(logger, exception);
+    
+    public static void LogAccommodationUpdaterGetHotels(this ILogger logger, int i, int batchSizeInc)
+        => AccommodationUpdaterGetHotels(logger, i, batchSizeInc);
 }

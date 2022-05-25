@@ -39,7 +39,7 @@ public class ZoneLoader : IUpdateWorker
         catch (Exception ex)
         {
             _logger.LogZoneLoaderException(ex);
-        }        
+        }
     }
 
 
@@ -49,10 +49,14 @@ public class ZoneLoader : IUpdateWorker
             Code = zone.Code,
             Name = zone.Name,
             IATA = zone.IATA,
+            ParentCode = zone.ParentCode,
+            AreaType = Enum.TryParse(zone.AreaType, out ZoneType zoneType)
+                                ? zoneType
+                                : ZoneType.OTR
         };
 
 
     private readonly IJuniperServiceClient _client;
     private readonly ILogger<ZoneLoader> _logger;
-    private readonly JuniperContext _context;    
+    private readonly JuniperContext _context;
 }

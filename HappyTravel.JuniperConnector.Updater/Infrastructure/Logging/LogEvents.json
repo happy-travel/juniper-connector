@@ -78,5 +78,27 @@
     "level": "Information",
     "template": "Finish raw data update with id '{updateId}'",
     "argumentTypes": [ "int" ]
+  },
+  {
+    "id": 40012,
+    "name": "StartingAccommodationUpdater",
+    "level": "Information",
+    "template": "Starting accommodation updater",
+    "argumentTypes": []
+  },
+  {
+    "id": 40013,
+    "name": "AccommodationUpdaterException",
+    "level": "Critical",
+    "template": "Accommodation updater: ",
+    "argumentTypes": [],
+    "hasException": true
+  },
+  {
+    "id": 40014,
+    "name": "AccommodationUpdaterGetHotels",
+    "level": "Information",
+    "template": "Get hotels from DB. From {i} to {batchSizeInc}",
+    "argumentTypes": [ "int", "int" ]
   }
 ]
