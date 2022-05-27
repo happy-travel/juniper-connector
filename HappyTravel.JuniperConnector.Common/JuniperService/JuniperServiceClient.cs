@@ -16,6 +16,28 @@ public class JuniperServiceClient : IJuniperServiceClient
     }
 
 
+    public async Task<List<JP_Zone>> GetZoneList()
+    {
+        var response = await GetZoneListResponse(new JP_ZoneListRQ
+        {
+            Language = Constants.DefaultLanguageCode,
+            Login = _login,
+            ZoneListRequest = new JP_ZoneListRequest
+            {
+                ProductType = JP_ProductType.HOT,
+                ShowIATA = true,
+                MaxLevel = 1
+            }
+        });
+
+        return response.ZoneList.ToList();
+    }
+
+
+    private async Task<JP_StaticDataRS> GetZoneListResponse(JP_ZoneListRQ request)
+    {
+        return await _staticDataClient.ZoneListAsync(request);
+    }
     private JP_Login GetLogin()
         => new JP_Login
         {
