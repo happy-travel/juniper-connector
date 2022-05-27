@@ -1,0 +1,12 @@
+{
+  "Database": {
+    "ConnectionString": "Server={0};Port={1};Database=juniper;Userid={2};Password={3};",
+    "Options": "juniper-connector/connection-string"
+  },
+  "Vault": {
+    "Endpoint": "HTDC_VAULT_ENDPOINT",
+    "Engine": "secrets",
+    "Role": "juniper",
+    "Token": "HTDC_VAULT_TOKEN"
+  }
+}
