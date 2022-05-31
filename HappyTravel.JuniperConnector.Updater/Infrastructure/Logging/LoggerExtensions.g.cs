@@ -26,6 +26,18 @@ public static partial class LoggerExtensions
     [LoggerMessage(40007, LogLevel.Critical, "Zone loader: ")]
     static partial void ZoneLoaderException(ILogger logger, System.Exception exception);
     
+    [LoggerMessage(40008, LogLevel.Information, "Starting raw data hotels update with id '{updateId}'")]
+    static partial void StartingHotelsUpdate(ILogger logger, int updateId);
+    
+    [LoggerMessage(40009, LogLevel.Information, "Deactivate all hotels")]
+    static partial void DeactivateAllHotels(ILogger logger);
+    
+    [LoggerMessage(40010, LogLevel.Critical, "Hotels loader: ")]
+    static partial void HotelLoaderException(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40011, LogLevel.Information, "Finish raw data update with id '{updateId}'")]
+    static partial void FinishHotelsUpdate(ILogger logger, int updateId);
+    
     
     
     public static void LogStartedWorker(this ILogger logger, string workerName)
@@ -48,4 +60,16 @@ public static partial class LoggerExtensions
     
     public static void LogZoneLoaderException(this ILogger logger, System.Exception exception)
         => ZoneLoaderException(logger, exception);
+    
+    public static void LogStartingHotelsUpdate(this ILogger logger, int updateId)
+        => StartingHotelsUpdate(logger, updateId);
+    
+    public static void LogDeactivateAllHotels(this ILogger logger)
+        => DeactivateAllHotels(logger);
+    
+    public static void LogHotelLoaderException(this ILogger logger, System.Exception exception)
+        => HotelLoaderException(logger, exception);
+    
+    public static void LogFinishHotelsUpdate(this ILogger logger, int updateId)
+        => FinishHotelsUpdate(logger, updateId);
 }

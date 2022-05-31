@@ -1,5 +1,4 @@
-﻿using HappyTravel.JuniperConnector.Common;
-using HappyTravel.JuniperConnector.Common.JuniperService;
+﻿using HappyTravel.JuniperConnector.Common.JuniperService;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Data.Models;
 using HappyTravel.JuniperConnector.Updater.Infrastructure.Logging;
@@ -33,14 +32,14 @@ public class ZoneLoader : IUpdateWorker
 
             _context.Zones.UpdateRange(zones.Where(c => zoneCodes.Contains(c.Code))
                                             .Select(c => ConvertToZoneEntity(c)));
+
+            await _context.SaveChangesAsync(cancellationToken);
+            _context.ChangeTracker.Clear();
         }
         catch (Exception ex)
         {
             _logger.LogZoneLoaderException(ex);
-        }
-
-        await _context.SaveChangesAsync(cancellationToken);
-        _context.ChangeTracker.Clear();
+        }        
     }
 
 
