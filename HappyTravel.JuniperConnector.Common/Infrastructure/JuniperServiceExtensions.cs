@@ -1,4 +1,5 @@
 ﻿using HappyTravel.JuniperConnector.Common.JuniperService;
+using JuniperServiceReference;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -48,6 +49,23 @@ public static class JuniperServiceExtensions
 
     private static EndpointAddress GetEndpointAddress(string endPoint)
         => new EndpointAddress(new Uri(endPoint));
+
+
+    public static T SetDefaultProperty<T>(this T request, JP_Login login)
+    {
+        PropertyInfo[] propertyInfo = request.GetType().GetProperties();
+
+        var loginProperty = propertyInfo.First(x => x.PropertyType == typeof(JP_Login));
+        loginProperty.SetValue(request, login);
+
+        var languageProperty = propertyInfo.First(x => x.Name == Constants.LanguageFieldName);
+        languageProperty.SetValue(request, Constants.DefaultLanguageCode);
+
+        var versionProperty = propertyInfo.First(x => x.Name == Constants.VersionFieldName);
+        versionProperty.SetValue(request, Constants.Version);
+
+        return request;
+    }
 
 
     private const long MaxReceivedMessageSize = 20000000;

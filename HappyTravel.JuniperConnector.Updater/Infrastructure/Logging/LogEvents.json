@@ -49,5 +49,34 @@
     "template": "Zone loader: ",
     "argumentTypes": [],
     "hasException": true
+  },
+  {
+    "id": 40008,
+    "name": "StartingHotelsUpdate",
+    "level": "Information",
+    "template": "Starting raw data hotels update with id '{updateId}'",
+    "argumentTypes": [ "int" ]
+  },
+  {
+    "id": 40009,
+    "name": "DeactivateAllHotels",
+    "level": "Information",
+    "template": "Deactivate all hotels",
+    "argumentTypes": []
+  },
+  {
+    "id": 40010,
+    "name": "HotelLoaderException",
+    "level": "Critical",
+    "template": "Hotels loader: ",
+    "argumentTypes": [],
+    "hasException": true
+  },
+  {
+    "id": 40011,
+    "name": "FinishHotelsUpdate",
+    "level": "Information",
+    "template": "Finish raw data update with id '{updateId}'",
+    "argumentTypes": [ "int" ]
   }
 ]

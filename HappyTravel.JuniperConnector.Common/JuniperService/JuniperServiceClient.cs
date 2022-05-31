@@ -18,19 +18,60 @@ public class JuniperServiceClient : IJuniperServiceClient
 
     public async Task<List<JP_Zone>> GetZoneList()
     {
-        var response = await GetZoneListResponse(new JP_ZoneListRQ
+        var request = new JP_ZoneListRQ
         {
-            Language = Constants.DefaultLanguageCode,
-            Login = _login,
             ZoneListRequest = new JP_ZoneListRequest
             {
                 ProductType = JP_ProductType.HOT,
                 ShowIATA = true,
                 MaxLevel = 1
             }
-        });
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetZoneListResponse(request);
 
         return response.ZoneList.ToList();
+    }
+
+
+    public async Task<List<JP_HotelContent>> GetHotelContents(IEnumerable<string> hotelCodes)
+    {
+        var request = new JP_HotelContentRQ
+        {
+            HotelContentList = hotelCodes.Select(x => GetHotelContentRequest(x)).ToArray(),
+            AdvancedOptions = new JP_HotelDataAdvancedOptions
+            {
+                ShowGiataCode = true
+            }
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetHotelContentResponse(request);
+
+        return response.Contents.HotelContent.ToList();
+
+        JP_HotelSimpleContent GetHotelContentRequest(string hotelCode)
+            => new JP_HotelSimpleContent
+            {
+                Code = hotelCode
+            };
+    }
+
+
+    public async Task<JP_HotelPortfolio> GetHotelPortfolio(int recordsPerPage, string nextToken)
+    {
+        var request = new JP_HotelPortfolioRQ
+        {
+            RecordsPerPage = recordsPerPage,
+            RecordsPerPageSpecified = true,
+            Token = nextToken
+        }
+        .SetDefaultProperty(_login);
+
+        var response = await GetHotelPortfolioResponse(request);
+
+        return response.HotelPortfolio;
     }
 
 
@@ -38,6 +79,20 @@ public class JuniperServiceClient : IJuniperServiceClient
     {
         return await _staticDataClient.ZoneListAsync(request);
     }
+
+
+    private async Task<JP_ContentRS> GetHotelContentResponse(JP_HotelContentRQ request)
+    {
+        return await _staticDataClient.HotelContentAsync(request);
+    }
+
+
+    private async Task<JP_StaticDataRS> GetHotelPortfolioResponse(JP_HotelPortfolioRQ request)
+    {
+        return await _staticDataClient.HotelPortfolioAsync(request);
+    }    
+
+
     private JP_Login GetLogin()
         => new JP_Login
         {

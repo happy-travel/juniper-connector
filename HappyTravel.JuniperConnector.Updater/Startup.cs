@@ -1,10 +1,10 @@
-﻿
-using HappyTravel.JuniperConnector.Common;
+﻿using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Common.Infrastructure.Environment;
 using HappyTravel.JuniperConnector.Common.JuniperService;
 using HappyTravel.JuniperConnector.Common.Settings;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Updater.Infrastructure;
+using HappyTravel.JuniperConnector.Updater.Service;
 using HappyTravel.JuniperConnector.Updater.Workers;
 using HappyTravel.VaultClient;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
+using System.Net;
 
 namespace HappyTravel.JuniperConnector.Updater;
 
@@ -35,9 +37,21 @@ public class Startup
         vaultClient.Login(EnvironmentVariableHelper.Get("Vault:Token", Configuration), LoginMethods.Token)?.GetAwaiter().GetResult();
         var apiConnectionOptions = vaultClient.Get("juniper-connector/api-connection").GetAwaiter().GetResult();
 
+        services.AddHttpClient(Constants.HttpStaticDataClientNames, client =>
+        {
+            client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip");
+        })
+        .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip
+        });
+
         services.AddTransient<JuniperSerializer>();
         services.AddTransient<JuniperContext>();
         services.AddTransient<ZoneLoader>();
+        services.AddTransient<HotelsUpdater>();
+        services.AddTransient<HotelLoader>();
+        services.AddTransient<UpdateHistoryService>();
 
         services.AddTransient<IJuniperServiceClient, JuniperServiceClient>();
 
@@ -65,6 +79,7 @@ public class Startup
         if (string.IsNullOrWhiteSpace(workersToRun))
         {
             services.AddTransient<IUpdateWorker, ZoneLoader>();
+            services.AddTransient<IUpdateWorker, HotelLoader>();
         }
         else
         {
@@ -72,6 +87,8 @@ public class Startup
             {
                 if (workerName == nameof(ZoneLoader))
                     services.AddTransient<IUpdateWorker, ZoneLoader>();
+                if (workerName == nameof(HotelLoader))
+                    services.AddTransient<IUpdateWorker, HotelLoader>();
             }
         }
     }
