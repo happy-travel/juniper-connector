@@ -3,6 +3,7 @@ using System;
 using HappyTravel.JuniperConnector.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HappyTravel.JuniperConnector.Data.Migrations
 {
     [DbContext(typeof(JuniperContext))]
-    partial class JuniperContextModelSnapshot : ModelSnapshot
+    [Migration("20220523074425_AddAccommodations")]
+    partial class AddAccommodations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,17 +109,11 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
-                    b.Property<int>("AreaType")
-                        .HasColumnType("integer");
-
                     b.Property<string>("IATA")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ParentCode")
                         .HasColumnType("text");
 
                     b.HasKey("Code");

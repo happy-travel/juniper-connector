@@ -3,6 +3,7 @@ using System;
 using HappyTravel.JuniperConnector.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HappyTravel.JuniperConnector.Data.Migrations
 {
     [DbContext(typeof(JuniperContext))]
-    partial class JuniperContextModelSnapshot : ModelSnapshot
+    [Migration("20220523082922_AddParentCodeInZones")]
+    partial class AddParentCodeInZones
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
