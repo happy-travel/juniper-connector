@@ -45,7 +45,6 @@ public static class ServiceCollectionExtensions
         return services.Configure<ApiConnectionSettings>(options =>
             {
                 options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
-                options.CheckTransactionsEndPoint = apiConnectionOptions["checkTransactionsEndPoint"];
                 options.Email = apiConnectionOptions["email"];
                 options.Password = apiConnectionOptions["password"];
             });
