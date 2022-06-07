@@ -99,4 +99,26 @@ public static class AvailabilityRequestExtensions
                 roomPaxes.ToArray());
         }
     }
+
+
+    public static JP_HotelBookingRuleRQ ToJuniperBookingRulesRequest(this AvailabilityRequest request, string ratePlanCode, string accommodationId)
+        => new JP_HotelBookingRuleRQ()
+            {
+                HotelBookingRulesRequest = new JP_HotelBookingRulesRequest()
+                {
+                    HotelOption = new JP_HotelOptionRequest()
+                    {
+                        RatePlanCode = ratePlanCode
+                    },
+                    SearchSegmentsHotels = new JP_SearchSegmentsHotels()
+                    {
+                        SearchSegmentHotels = new JP_SearchSegmentHotels()
+                        {
+                            Start = request.CheckInDate.DateTime,
+                            End = request.CheckOutDate.DateTime
+                        },
+                        HotelCodes = new string[] { accommodationId }
+                    }
+                }
+            };
 }
