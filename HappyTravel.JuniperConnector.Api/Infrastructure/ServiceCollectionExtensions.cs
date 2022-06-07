@@ -1,6 +1,7 @@
 ﻿using HappyTravel.HttpRequestAuditLogger.Extensions;
 using HappyTravel.HttpRequestLogger;
 using HappyTravel.JuniperConnector.Api.Services;
+using HappyTravel.JuniperConnector.Common.JuniperService;
 using HappyTravel.JuniperConnector.Common.Settings;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
@@ -56,8 +57,15 @@ public static class ServiceCollectionExtensions
     {
         var fukuokaOptions = vaultClient.Get(configuration["Fukuoka:Options"]).GetAwaiter().GetResult();
 
-        services.AddTransient<JuniperClient>()       
-            .AddHttpClient(Common.Constants.HttpAvailClientName, client =>
+        ConfigureHttpAvailClient();
+        ConfigureHttpCkeckTransactionsClient();
+
+        return services.AddTransient<JuniperClient>();
+
+
+        void ConfigureHttpAvailClient()
+        {
+            services.AddHttpClient(Common.Constants.HttpAvailClientName, client =>
             {
                 client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip, deflate");
             })
@@ -76,7 +84,30 @@ public static class ServiceCollectionExtensions
                     return !string.IsNullOrEmpty(url) && (url.Contains("/HotelAvail"));
                 };
             });
+        }
 
-        return services;
+
+        void ConfigureHttpCkeckTransactionsClient()
+        {
+            services.AddHttpClient(Common.Constants.HttpCkeckTransactionsClientName, client =>
+            {
+                client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip, deflate");
+            })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            })
+            .AddHttpClientRequestLogging(configuration: configuration)
+            .UseHttpClientMetrics()
+            .AddHttpRequestAudit(options =>
+            {
+                options.Endpoint = fukuokaOptions["endpoint"];
+                options.LoggingCondition = request =>
+                {
+                    var url = request.Headers.GetValues("SOAPAction").FirstOrDefault();
+                    return !string.IsNullOrEmpty(url) && (url.Contains("/HotelCheckAvail"));
+                };
+            });
+        }
     }
 }

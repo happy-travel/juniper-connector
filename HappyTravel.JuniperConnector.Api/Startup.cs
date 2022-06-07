@@ -70,7 +70,8 @@ public class Startup
             .AddTransient<AvailabilitySearchMapper>();
 
         services.AddTransient<AvailabilityRequestStorage>()
-            .AddTransient<AvailabilitySearchResultStorage>();
+            .AddTransient<AvailabilitySearchResultStorage>()
+            .AddTransient<BookingCodeStorage>();
 
         services.ConfigureApiConnictionSettings(vaultClient)
             .ConfigureHttpClients(Configuration, vaultClient);

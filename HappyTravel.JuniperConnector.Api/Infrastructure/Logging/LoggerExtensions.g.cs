@@ -14,6 +14,9 @@ public static partial class LoggerExtensions
     [LoggerMessage(30003, LogLevel.Warning, "Get accommodation by availabilityId `{AvailabilityId}` from storage failed")]
     static partial void GetAccommodationFromStorageFailed(ILogger logger, string AvailabilityId);
     
+    [LoggerMessage(30004, LogLevel.Warning, "Get BookingCode by availabilityId `{AvailabilityId}` and room contract set id `{RoomContractSetId}` from storage failed")]
+    static partial void GetBookingCodeFromStorageFailed(ILogger logger, string AvailabilityId, System.Guid RoomContractSetId);
+    
     
     
     public static void LogWithinearthRequestResult(this ILogger logger, string message)
@@ -24,4 +27,7 @@ public static partial class LoggerExtensions
     
     public static void LogGetAccommodationFromStorageFailed(this ILogger logger, string AvailabilityId)
         => GetAccommodationFromStorageFailed(logger, AvailabilityId);
+    
+    public static void LogGetBookingCodeFromStorageFailed(this ILogger logger, string AvailabilityId, System.Guid RoomContractSetId)
+        => GetBookingCodeFromStorageFailed(logger, AvailabilityId, RoomContractSetId);
 }

@@ -36,10 +36,37 @@ public class JuniperClient
     }
 
 
+    public async Task<Result<JP_BookingRules>> GetHotelbookingRules(JP_HotelBookingRuleRQ request)
+    {
+        request.SetDefaultProperty(_login);
+
+        var client = CreateCheckTransactionsClient();
+        var response = await client.HotelBookingRulesAsync(request);
+
+        if (response.Errors?.Length > 0)
+        {
+            var errorMessage = GetErrorMessage(response.Errors);
+
+            return Result.Failure<JP_BookingRules>(errorMessage);
+        }
+
+        return response.Results;
+    }
+
+
     private AvailTransactionsClient CreateAvailTransactionsClient()
     {
         var client = new AvailTransactionsClient(GetBasicHttpBinding("JuniperAvailServiceSoap"), GetEndpointAddress(_options.AvailEndPoint));
         ConfigureClient(client, Common.Constants.HttpAvailClientName);
+
+        return client;
+    }
+
+
+    private CheckTransactionsClient CreateCheckTransactionsClient()
+    {
+        var client = new CheckTransactionsClient(GetBasicHttpBinding("JuniperCheckTransactionsServiceSoap"), GetEndpointAddress(_options.CheckTransactionsEndPoint));
+        ConfigureClient(client, Common.Constants.HttpCkeckTransactionsClientName);
 
         return client;
     }

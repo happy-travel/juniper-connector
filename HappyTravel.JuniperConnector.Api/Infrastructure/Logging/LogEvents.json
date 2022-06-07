@@ -19,5 +19,12 @@
     "template": "Get accommodation by availabilityId `{AvailabilityId}` from storage failed",
     "level": "Warning",
     "argumentTypes": [ "string" ]
+  },
+  {
+    "id": 30004,
+    "name": "GetBookingCodeFromStorageFailed",
+    "template": "Get BookingCode by availabilityId `{AvailabilityId}` and room contract set id `{RoomContractSetId}` from storage failed",
+    "level": "Warning",
+    "argumentTypes": [ "string", "System.Guid" ]
   }
 ]

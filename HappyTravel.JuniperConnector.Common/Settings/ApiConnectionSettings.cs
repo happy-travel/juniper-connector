@@ -6,4 +6,5 @@ public class ApiConnectionSettings
     public string Password { get; set; }
     public string StaticDataEndPoint { get; set; }
     public string AvailEndPoint { get; set; }
+    public string CheckTransactionsEndPoint { get; set; }
 }
