@@ -9,13 +9,17 @@ using HappyTravel.BaseConnector.Api.Services.Bookings;
 using HappyTravel.BaseConnector.Api.Services.Locations;
 using HappyTravel.ErrorHandling.Extensions;
 using HappyTravel.HttpRequestLogger;
+using HappyTravel.JuniperConnector.Api.Infrastructure;
 using HappyTravel.JuniperConnector.Api.Services.Accommodations;
+using HappyTravel.JuniperConnector.Api.Services.Availabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.AccommodationAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.Cancellations;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.RoomContractSetAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.WideAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Bookings;
+using HappyTravel.JuniperConnector.Api.Services.Caching;
 using HappyTravel.JuniperConnector.Api.Services.Locations;
+using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -48,6 +52,10 @@ public class Startup
 
         services.AddBaseConnectorServices(Configuration, HostEnvironment, vaultClient, Program.ConnectorName);
 
+        services.ConfigureDatabaseOptions(Configuration, vaultClient)
+            .AddHealthChecks()
+            .AddDbContextCheck<JuniperContext>();
+
         services.AddTransient<HttpRequestLoggingHandler>();
 
         services.AddTransient<IAccommodationService, AccommodationService>()
@@ -58,7 +66,14 @@ public class Startup
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
 
-        services.AddHealthChecks();
+        services.AddTransient<WideAvailabilitySearchRequestExecutor>()
+            .AddTransient<AvailabilitySearchMapper>();
+
+        services.AddTransient<AvailabilityRequestStorage>()
+            .AddTransient<AvailabilitySearchResultStorage>();
+
+        services.ConfigureApiConnictionSettings(vaultClient)
+            .ConfigureHttpClients(Configuration, vaultClient);
 
         services.AddSwaggerGen(options =>
         {
