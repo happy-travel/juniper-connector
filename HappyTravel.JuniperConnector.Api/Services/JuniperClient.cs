@@ -34,7 +34,25 @@ public class JuniperClient
 
         return response.Reservations.ToList();
     }
-   
+
+
+    public async Task<Result<List<JP_Reservation>>> CancelBooking(JP_CancelRQ request)
+    {
+        request.SetDefaultProperty(_login);
+
+        var client = CreateBookTransactionsClient();
+        var response = await client.CancelBookingAsync(request);
+
+        if (response.Errors?.Length > 0)
+        {
+            var errorMessage = GetErrorMessage(response.Errors);
+
+            return Result.Failure<List<JP_Reservation>>(errorMessage);
+        }
+
+        return response.Reservations.ToList();
+    }
+
 
     public async Task<Result<JP_Results>> GetHotelAvailability(JP_HotelAvail request)
     {

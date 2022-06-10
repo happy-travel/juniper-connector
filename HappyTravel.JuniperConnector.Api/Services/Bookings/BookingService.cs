@@ -94,9 +94,34 @@ public class BookingService : IBookingService
     }
 
 
-    public Task<Result> Cancel(string referenceCode, CancellationToken cancellationToken)
+    public async Task<Result> Cancel(string referenceCode, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _bookingManager.Get(referenceCode)
+            .Bind(CancelBooking);
+
+
+        async Task<Result> CancelBooking(Data.Models.Booking booking)
+        {
+            var request = new JP_CancelRQ()
+            {
+                CancelRequest = new JP_CancelRequest()
+                {
+                    ReservationLocator = booking.SupplierReferenceCode
+                }
+            };
+
+            var (isSuccess, _, response, error) = await _juniperClient.CancelBooking(request);
+
+            if (isSuccess)
+            {
+                var reservation = response.Single();
+
+                if (reservation.Status == JP_ResStatus.CAN || reservation.Status == JP_ResStatus.CAC)
+                    return Result.Success();
+            }
+
+            return Result.Failure(error);
+        }
     }
 
 
