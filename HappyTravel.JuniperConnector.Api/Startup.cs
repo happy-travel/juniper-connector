@@ -66,12 +66,15 @@ public class Startup
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
 
-        services.AddTransient<WideAvailabilitySearchRequestExecutor>()
-            .AddTransient<AvailabilitySearchMapper>();
+        services.AddTransient<WideAvailabilitySearchRequestExecutor>();
+
+        services.AddTransient<AvailabilitySearchMapper>();
 
         services.AddTransient<AvailabilityRequestStorage>()
             .AddTransient<AvailabilitySearchResultStorage>()
             .AddTransient<BookingCodeStorage>();
+
+        services.AddTransient<BookingManager>();
 
         services.ConfigureApiConnictionSettings(vaultClient)
             .ConfigureHttpClients(Configuration, vaultClient);

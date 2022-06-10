@@ -17,7 +17,7 @@ public static class DeadlineMapper
         var polities = new List<CancellationPolicy>();
         foreach (var rule in cancelPolicy.PolicyRules)
         {
-            var fromDate = GetFromDateValue(rule);
+            var fromDate = GetFromDateValue(rule)?.ToUniversalTime();
             var percentage = GetPercentage(rule);
 
             if (fromDate is not null && percentage is not null && percentage > 0)
@@ -29,7 +29,7 @@ public static class DeadlineMapper
 
         polities = polities.OrderBy(p => p.FromDate).ToList();
 
-        var firstDeadline = GetFirstDeadline(cancelPolicy.FirstDayCostCancellation, polities);
+        var firstDeadline = GetFirstDeadline(cancelPolicy.FirstDayCostCancellation, polities)?.ToUniversalTime();
 
         List<string>? remarks = null;
         if (!string.IsNullOrWhiteSpace(cancelPolicy.Description))
@@ -113,7 +113,8 @@ public static class DeadlineMapper
                 }
             }
 
-            if (date is null && polities.Count > 0)
+            else 
+            if (polities.Count > 0)
                 date = polities.Min(p => p.FromDate);
 
             return date;

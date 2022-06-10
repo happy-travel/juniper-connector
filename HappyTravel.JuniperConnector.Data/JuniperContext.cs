@@ -8,6 +8,7 @@ public class JuniperContext : DbContext
     public JuniperContext()
     { }
 
+
     public JuniperContext(DbContextOptions<JuniperContext> options) : base(options)
     { }
 
@@ -15,6 +16,7 @@ public class JuniperContext : DbContext
     public DbSet<Zone> Zones { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
     public DbSet<StaticDataUpdateHistoryEntry> StaticDataUpdateHistory { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -29,6 +31,11 @@ public class JuniperContext : DbContext
             c.HasKey(c => c.Code);
             c.Property(r => r.Data).HasColumnType("jsonb");
             c.Property(p => p.IsActive).HasDefaultValue(true);
+        });
+
+        builder.Entity<Booking>(b =>
+        {
+            b.HasKey(b => b.ReferenceCode);
         });
     }
 }

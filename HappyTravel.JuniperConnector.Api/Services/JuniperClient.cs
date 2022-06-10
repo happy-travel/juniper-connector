@@ -16,6 +16,24 @@ public class JuniperClient
         _options = options.Value;
         _login = GetLogin();
     }
+
+
+    public async Task<Result<List<JP_Reservation>>> Book(JP_HotelBooking request)
+    {
+        request.SetDefaultProperty(_login);
+
+        var client = CreateBookTransactionsClient();
+        var response = await client.HotelBookingAsync(request);
+
+        if (response.Errors?.Length > 0)
+        {
+            var errorMessage = GetErrorMessage(response.Errors);
+
+            return Result.Failure<List<JP_Reservation>>(errorMessage);
+        }
+
+        return response.Reservations.ToList();
+    }
    
 
     public async Task<Result<JP_Results>> GetHotelAvailability(JP_HotelAvail request)
@@ -58,6 +76,15 @@ public class JuniperClient
     {
         var client = new AvailTransactionsClient(GetBasicHttpBinding("JuniperAvailServiceSoap"), GetEndpointAddress(_options.AvailEndPoint));
         ConfigureClient(client, Common.Constants.HttpAvailClientName);
+
+        return client;
+    }
+
+
+    private BookTransactionsClient CreateBookTransactionsClient()
+    {
+        var client = new BookTransactionsClient(GetBasicHttpBinding("JuniperBookingServiceSoap"), GetEndpointAddress(_options.BookTransactionsEndPoint));
+        ConfigureClient(client, Common.Constants.HttpBookingClientName);
 
         return client;
     }

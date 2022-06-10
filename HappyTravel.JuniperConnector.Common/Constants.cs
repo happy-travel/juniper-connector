@@ -5,6 +5,7 @@ public static class Constants
     public static string HttpStaticDataClientNames = "JuniperStaticDataServiceClient";
     public static string HttpAvailClientName = "JuniperAvailServiceClient";
     public static string HttpCkeckTransactionsClientName = "JuniperCkeckTransactionsClient";
+    public static string HttpBookingClientName = "JuniperBookingClientName";
     public const string DefaultLanguageCode = "en";
     public static string Version = "1.1";
     public static string LanguageFieldName = "Language";

@@ -74,7 +74,7 @@ public static class AvailabilityRequestExtensions
                     {
                         IdPax = paxIdsCounter,
                         Age = childAge,
-                        AgeSpecified=true
+                        AgeSpecified = true
                     });
                     roomPaxIds.Add(paxIdsCounter);
 

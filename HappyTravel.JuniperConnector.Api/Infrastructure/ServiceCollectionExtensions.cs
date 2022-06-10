@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
 
         ConfigureHttpAvailClient();
         ConfigureHttpCkeckTransactionsClient();
+        CongigureHttpBookingClient();
 
         return services.AddTransient<JuniperClient>();
 
@@ -106,6 +107,31 @@ public static class ServiceCollectionExtensions
                 {
                     var url = request.Headers.GetValues("SOAPAction").FirstOrDefault();
                     return !string.IsNullOrEmpty(url) && (url.Contains("/HotelCheckAvail"));
+                };
+            });
+        }
+
+
+        void CongigureHttpBookingClient()
+        {
+            services.AddHttpClient(Common.Constants.HttpBookingClientName, client =>
+            {
+                client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip, deflate");
+            })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            })
+            .AddHttpClientRequestLogging(configuration: configuration)
+            .UseHttpClientMetrics()
+            .AddHttpMessageHandler<JuniperHttpHandler>()
+            .AddHttpRequestAudit(options =>
+            {
+                options.Endpoint = fukuokaOptions["endpoint"];
+                options.LoggingCondition = request =>
+                {
+                    var url = request.Headers.GetValues("SOAPAction").FirstOrDefault();
+                    return !string.IsNullOrEmpty(url) && (url.Contains("/HotelBooking") || url.Contains("/ReadBooking") || url.Contains("/CancelBooking"));
                 };
             });
         }
