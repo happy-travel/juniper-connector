@@ -90,6 +90,24 @@ public class JuniperClient
     }
 
 
+    public async Task<Result<List<JP_Reservation>>> ReadBooking(JP_ReadRQ request)
+    {
+        request.SetDefaultProperty(_login);
+
+        var client = CreateBookTransactionsClient();
+        var response = await client.ReadBookingAsync(request);
+
+        if (response.Errors?.Length > 0)
+        {
+            var errorMessage = GetErrorMessage(response.Errors);
+
+            return Result.Failure<List<JP_Reservation>>(errorMessage);
+        }
+
+        return response.Reservations.ToList();
+    }
+
+
     private AvailTransactionsClient CreateAvailTransactionsClient()
     {
         var client = new AvailTransactionsClient(GetBasicHttpBinding("JuniperAvailServiceSoap"), GetEndpointAddress(_options.AvailEndPoint));

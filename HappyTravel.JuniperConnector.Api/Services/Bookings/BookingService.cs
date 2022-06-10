@@ -125,9 +125,38 @@ public class BookingService : IBookingService
     }
 
 
-    public Task<Result<Booking>> Get(string referenceCode, CancellationToken cancellationToken)
+    public async Task<Result<Booking>> Get(string referenceCode, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _bookingManager.Get(referenceCode)
+            .Bind(ReadBooking)
+            .Map(MapToContract);
+
+
+        async Task<Result<(Data.Models.Booking, JP_Reservation)>> ReadBooking(Data.Models.Booking booking)
+        {
+            var request = new JP_ReadRQ()
+            {
+                ReadRequest = new JP_ReadRequest()
+                {
+                    ReservationLocator = booking.SupplierReferenceCode
+                }
+            };
+
+            var (isSuccess, _, reservation, error) = await _juniperClient.ReadBooking(request);
+
+            if (isSuccess)
+                return (booking, reservation.Single());
+
+            return Result.Failure<(Data.Models.Booking, JP_Reservation)>(error);
+        }
+
+
+        Booking MapToContract((Data.Models.Booking, JP_Reservation) result)
+        {
+            var (booking, reservation) = result;
+
+            return BookingMapper.Map(reservation, referenceCode, booking.CheckInDate, booking.CheckOutDate);
+        }
     }
 
 
