@@ -9,7 +9,7 @@ namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class BookingRequestExtensions
 {
-    public static JP_HotelBooking ToJuniperBookingRequest(this BookingRequest request, string bookingCode, string accommodationId, 
+    public static JP_HotelBooking ToJuniperBookingRequest(this BookingRequest request, string bookingCode, string residency, string accommodationId, 
         DateTimeOffset checkInDate, DateTimeOffset checkOutDate, double price, Currencies currency)
     {
         var paxes = GetPaxes();
@@ -25,7 +25,9 @@ public static class BookingRequestExtensions
                         Title = p.Item2.GetPaxTitle(),
                         Name = p.Item2.FirstName,
                         Surname = p.Item2.LastName,
-                        Age = p.Item2.Age
+                        Age = p.Item2.Age,
+                        AgeSpecified = true,                        
+                        Nationality = residency
                     })
                     .ToArray()
             },
@@ -59,9 +61,12 @@ public static class BookingRequestExtensions
                     HotelBookingInfo = new JP_HotelBookingInfo()
                     {
                         Start = checkInDate.DateTime,
+                        StartSpecified = true,
                         End = checkOutDate.DateTime,
+                        EndSpecified = true,
                         HotelCode = accommodationId,
                         Status = JP_AvailStatus.OK,
+                        StatusSpecified = true,
                         Price = new JP_BookingPrice()
                         {
                             PriceRange = new JP_PriceRange()
