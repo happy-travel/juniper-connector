@@ -45,8 +45,9 @@ public static class ServiceCollectionExtensions
 
         return services.Configure<ApiConnectionSettings>(options =>
             {
-                options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
+                options.AvailEndPoint = apiConnectionOptions["availTransactionsEndPoint"];
                 options.CheckTransactionsEndPoint = apiConnectionOptions["checkTransactionsEndPoint"];
+                options.BookTransactionsEndPoint = apiConnectionOptions["bookTransactionsEndPoint"];
                 options.Email = apiConnectionOptions["email"];
                 options.Password = apiConnectionOptions["password"];
             });
@@ -124,7 +125,6 @@ public static class ServiceCollectionExtensions
             })
             .AddHttpClientRequestLogging(configuration: configuration)
             .UseHttpClientMetrics()
-            .AddHttpMessageHandler<JuniperHttpHandler>()
             .AddHttpRequestAudit(options =>
             {
                 options.Endpoint = fukuokaOptions["endpoint"];

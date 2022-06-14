@@ -58,6 +58,7 @@ public class BookingService : IBookingService
             var cachedRoomContractSet = cachedAccommodationAvailability.CachedRoomContractSets.Single(r => r.Id == bookingRequest.RoomContractSetId);
 
             var (isSuccess, _, booking, error) = await _juniperClient.Book(bookingRequest.ToJuniperBookingRequest(bookingCode,
+                availabilityRequest.Residency,
                 cachedAccommodationAvailability.AccommodationId,
                 availabilityRequest.CheckInDate,
                 availabilityRequest.CheckOutDate,
@@ -73,7 +74,7 @@ public class BookingService : IBookingService
 
         async Task SaveBooking((AvailabilityRequest, CachedAccommodationAvailability, JP_Reservation) result)
         {
-            var(availabilityRequest, cachedAccommodationAvailability, reservation) = result;
+            var (availabilityRequest, cachedAccommodationAvailability, reservation) = result;
 
             await _bookingManager.Add(new Data.Models.Booking()
             {

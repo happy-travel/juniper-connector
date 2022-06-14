@@ -17,30 +17,10 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Booking", b =>
-                {
-                    b.Property<string>("ReferenceCode")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("CheckInDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("CheckOutDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SupplierReferenceCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ReferenceCode");
-
-                    b.ToTable("Bookings");
-                });
 
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Hotel", b =>
                 {
@@ -61,7 +41,7 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("Hotels");
+                    b.ToTable("Hotels", (string)null);
                 });
 
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.StaticDataUpdateHistoryEntry", b =>
@@ -90,7 +70,7 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaticDataUpdateHistory");
+                    b.ToTable("StaticDataUpdateHistory", (string)null);
                 });
 
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Zone", b =>
@@ -107,7 +87,7 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("Zones");
+                    b.ToTable("Zones", (string)null);
                 });
 #pragma warning restore 612, 618
         }
