@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using HappyTravel.JuniperConnector.Api.Infrastructure.Logging;
 using HappyTravel.JuniperConnector.Common.Infrastructure;
 using HappyTravel.JuniperConnector.Common.JuniperService;
 using HappyTravel.JuniperConnector.Common.Settings;
@@ -10,7 +11,8 @@ namespace HappyTravel.JuniperConnector.Api.Services;
 
 public class JuniperClient
 {
-    public JuniperClient (IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options)
+    public JuniperClient (IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options,
+        ILogger<JuniperClient> logger)
     {
         _factory = factory;
         _options = options.Value;
@@ -23,16 +25,25 @@ public class JuniperClient
         request.SetDefaultProperty(_login);
 
         var client = CreateBookTransactionsClient();
-        var response = await client.HotelBookingAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.HotelBookingAsync(request);
 
-            return Result.Failure<List<JP_Reservation>>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<List<JP_Reservation>>(errorMessage);
+            }
+
+            return response.Reservations.ToList();
         }
-
-        return response.Reservations.ToList();
+        catch (Exception e)
+        {
+            _logger.LogBookingRequestFailed(e);
+            return Result.Failure<List<JP_Reservation>>("Request failed");
+        }
     }
 
 
@@ -59,34 +70,52 @@ public class JuniperClient
         request.SetDefaultProperty(_login);
 
         var client = CreateAvailTransactionsClient();
-        var response = await client.HotelAvailAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.HotelAvailAsync(request);
 
-            return Result.Failure<JP_Results>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<JP_Results>(errorMessage);
+            }
+
+            return response.Results;
         }
-
-        return response.Results;
+        catch (Exception e)
+        {
+            _logger.LogSearchRequestFailed(e);
+            return Result.Failure<JP_Results>("Request failed");
+        }
     }
 
 
-    public async Task<Result<JP_BookingRules>> GetHotelbookingRules(JP_HotelBookingRuleRQ request)
+    public async Task<Result<JP_BookingRules>> GetHotelBookingRules(JP_HotelBookingRuleRQ request)
     {
         request.SetDefaultProperty(_login);
 
         var client = CreateCheckTransactionsClient();
-        var response = await client.HotelBookingRulesAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.HotelBookingRulesAsync(request);
 
-            return Result.Failure<JP_BookingRules>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<JP_BookingRules>(errorMessage);
+            }
+
+            return response.Results;
         }
-
-        return response.Results;
+        catch (Exception e)
+        {
+            _logger.LogBookingRulesRequestFailed(e);
+            return Result.Failure<JP_BookingRules>("Request failed");
+        }
     }
 
 
@@ -166,4 +195,5 @@ public class JuniperClient
     private readonly IHttpMessageHandlerFactory _factory;
     private readonly ApiConnectionSettings _options;
     private readonly JP_Login _login;
+    private readonly ILogger<JuniperClient> _logger;
 }
