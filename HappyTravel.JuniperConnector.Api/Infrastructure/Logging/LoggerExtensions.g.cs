@@ -5,13 +5,13 @@ namespace HappyTravel.JuniperConnector.Api.Infrastructure.Logging;
 
 public static partial class LoggerExtensions
 {
-    [LoggerMessage(30001, LogLevel.Debug, "WithinearthShoppingClient: {message}")]
-    static partial void WithinearthRequestResult(ILogger logger, string message);
+    [LoggerMessage(30001, LogLevel.Error, "Search request failed")]
+    static partial void SearchRequestFailed(ILogger logger, System.Exception exception);
     
-    [LoggerMessage(30002, LogLevel.Warning, "Get availability request by id `{AvailabilityId}` from storage failed")]
+    [LoggerMessage(30010, LogLevel.Warning, "Get availability request by id `{AvailabilityId}` from storage failed")]
     static partial void GetAvailabilityRequestFromStorageFailed(ILogger logger, string AvailabilityId);
     
-    [LoggerMessage(30003, LogLevel.Warning, "Get accommodation by availabilityId `{AvailabilityId}` from storage failed")]
+    [LoggerMessage(30011, LogLevel.Warning, "Get accommodation by availabilityId `{AvailabilityId}` from storage failed")]
     static partial void GetAccommodationFromStorageFailed(ILogger logger, string AvailabilityId);
     
     [LoggerMessage(30004, LogLevel.Warning, "Get BookingCode by availabilityId `{AvailabilityId}` and room contract set id `{RoomContractSetId}` from storage failed")]
@@ -19,8 +19,8 @@ public static partial class LoggerExtensions
     
     
     
-    public static void LogWithinearthRequestResult(this ILogger logger, string message)
-        => WithinearthRequestResult(logger, message);
+    public static void LogSearchRequestFailed(this ILogger logger, System.Exception exception)
+        => SearchRequestFailed(logger, exception);
     
     public static void LogGetAvailabilityRequestFromStorageFailed(this ILogger logger, string AvailabilityId)
         => GetAvailabilityRequestFromStorageFailed(logger, AvailabilityId);

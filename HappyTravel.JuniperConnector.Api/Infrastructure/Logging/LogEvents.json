@@ -1,20 +1,20 @@
 [
   {
     "id": 30001,
-    "name": "WithinearthRequestResult",
-    "level": "Debug",
-    "template": "WithinearthShoppingClient: {message}",
-    "argumentTypes": [ "string" ]
+    "name": "SearchRequestFailed",
+    "level": "Error",
+    "template": "Search request failed",
+    "hasException": true
   },
   {
-    "id": 30002,
+    "id": 30010,
     "name": "GetAvailabilityRequestFromStorageFailed",
     "template": "Get availability request by id `{AvailabilityId}` from storage failed",
     "level": "Warning",
     "argumentTypes": [ "string" ]
   },
   {
-    "id": 30003,
+    "id": 30011,
     "name": "GetAccommodationFromStorageFailed",
     "template": "Get accommodation by availabilityId `{AvailabilityId}` from storage failed",
     "level": "Warning",

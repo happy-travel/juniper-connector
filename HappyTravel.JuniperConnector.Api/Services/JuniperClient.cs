@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using HappyTravel.JuniperConnector.Api.Infrastructure.Logging;
 using HappyTravel.JuniperConnector.Common.Infrastructure;
 using HappyTravel.JuniperConnector.Common.JuniperService;
 using HappyTravel.JuniperConnector.Common.Settings;
@@ -10,7 +11,8 @@ namespace HappyTravel.JuniperConnector.Api.Services;
 
 public class JuniperClient
 {
-    public JuniperClient (IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options)
+    public JuniperClient (IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options,
+        ILogger<JuniperClient> logger)
     {
         _factory = factory;
         _options = options.Value;
@@ -23,16 +25,25 @@ public class JuniperClient
         request.SetDefaultProperty(_login);
 
         var client = CreateAvailTransactionsClient();
-        var response = await client.HotelAvailAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.HotelAvailAsync(request);
 
-            return Result.Failure<JP_Results>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<JP_Results>(errorMessage);
+            }
+
+            return response.Results;
         }
-
-        return response.Results;
+        catch (Exception e)
+        {
+            _logger.LogSearchRequestFailed(e);
+            return Result.Failure<JP_Results>("Request failed");
+        }
     }
 
 
@@ -121,4 +132,5 @@ public class JuniperClient
     private readonly IHttpMessageHandlerFactory _factory;
     private readonly ApiConnectionSettings _options;
     private readonly JP_Login _login;
+    private readonly ILogger<JuniperClient> _logger;
 }
