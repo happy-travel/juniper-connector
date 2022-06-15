@@ -11,6 +11,9 @@ public static partial class LoggerExtensions
     [LoggerMessage(30002, LogLevel.Error, "BookingRules request failed")]
     static partial void BookingRulesRequestFailed(ILogger logger, System.Exception exception);
     
+    [LoggerMessage(30003, LogLevel.Error, "Booking request failed")]
+    static partial void BookingRequestFailed(ILogger logger, System.Exception exception);
+    
     [LoggerMessage(30010, LogLevel.Warning, "Get availability request by id `{AvailabilityId}` from storage failed")]
     static partial void GetAvailabilityRequestFromStorageFailed(ILogger logger, string AvailabilityId);
     
@@ -27,6 +30,9 @@ public static partial class LoggerExtensions
     
     public static void LogBookingRulesRequestFailed(this ILogger logger, System.Exception exception)
         => BookingRulesRequestFailed(logger, exception);
+    
+    public static void LogBookingRequestFailed(this ILogger logger, System.Exception exception)
+        => BookingRequestFailed(logger, exception);
     
     public static void LogGetAvailabilityRequestFromStorageFailed(this ILogger logger, string AvailabilityId)
         => GetAvailabilityRequestFromStorageFailed(logger, AvailabilityId);

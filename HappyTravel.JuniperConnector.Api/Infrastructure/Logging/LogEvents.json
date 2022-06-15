@@ -14,6 +14,13 @@
     "hasException": true
   },
   {
+    "id": 30003,
+    "name": "BookingRequestFailed",
+    "level": "Error",
+    "template": "Booking request failed",
+    "hasException": true
+  },
+  {
     "id": 30010,
     "name": "GetAvailabilityRequestFromStorageFailed",
     "template": "Get availability request by id `{AvailabilityId}` from storage failed",
