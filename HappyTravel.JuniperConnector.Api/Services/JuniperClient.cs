@@ -133,16 +133,25 @@ public class JuniperClient
         request.SetDefaultProperty(_login);
 
         var client = CreateBookTransactionsClient();
-        var response = await client.ReadBookingAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.ReadBookingAsync(request);
 
-            return Result.Failure<List<JP_Reservation>>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<List<JP_Reservation>>(errorMessage);
+            }
+
+            return response.Reservations.ToList();
         }
-
-        return response.Reservations.ToList();
+        catch (Exception e)
+        {
+            _logger.LogReadBookingRequestFailed(e);
+            return Result.Failure<List<JP_Reservation>>("Request failed");
+        }
     }
 
 
