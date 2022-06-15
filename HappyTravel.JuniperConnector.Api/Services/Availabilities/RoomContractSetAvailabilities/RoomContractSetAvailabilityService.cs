@@ -51,7 +51,7 @@ public class RoomContractSetAvailabilityService : IRoomContractSetAvailabilitySe
             var (availabilityRequest, accommodationAvailability) = cachedData;
             var ratePlanCode = accommodationAvailability.CachedRoomContractSets.Single(r => r.Id == roomContractSetId).RatePlanCode;
 
-            var (isSuccess, _, response, error) = await _client.GetHotelbookingRules(availabilityRequest.ToJuniperBookingRulesRequest(ratePlanCode, accommodationAvailability.AccommodationId));
+            var (isSuccess, _, response, error) = await _client.GetHotelBookingRules(availabilityRequest.ToJuniperBookingRulesRequest(ratePlanCode, accommodationAvailability.AccommodationId));
 
             if (isSuccess)
                 return (availabilityRequest, accommodationAvailability, response);
