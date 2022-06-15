@@ -47,21 +47,30 @@ public class JuniperClient
     }
 
 
-    public async Task<Result<JP_BookingRules>> GetHotelbookingRules(JP_HotelBookingRuleRQ request)
+    public async Task<Result<JP_BookingRules>> GetHotelBookingRules(JP_HotelBookingRuleRQ request)
     {
         request.SetDefaultProperty(_login);
 
         var client = CreateCheckTransactionsClient();
-        var response = await client.HotelBookingRulesAsync(request);
 
-        if (response.Errors?.Length > 0)
+        try
         {
-            var errorMessage = GetErrorMessage(response.Errors);
+            var response = await client.HotelBookingRulesAsync(request);
 
-            return Result.Failure<JP_BookingRules>(errorMessage);
+            if (response.Errors?.Length > 0)
+            {
+                var errorMessage = GetErrorMessage(response.Errors);
+
+                return Result.Failure<JP_BookingRules>(errorMessage);
+            }
+
+            return response.Results;
         }
-
-        return response.Results;
+        catch (Exception e)
+        {
+            _logger.LogBookingRulesRequestFailed(e);
+            return Result.Failure<JP_BookingRules>("Request failed");
+        }
     }
 
 
