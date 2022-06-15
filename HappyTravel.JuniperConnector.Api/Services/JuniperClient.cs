@@ -17,6 +17,7 @@ public class JuniperClient
         _factory = factory;
         _options = options.Value;
         _login = GetLogin();
+        _logger = logger;
     }
    
 
