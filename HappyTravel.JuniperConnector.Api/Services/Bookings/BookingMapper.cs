@@ -40,14 +40,12 @@ public class BookingMapper
 
         List<SlimRoomOccupation> GetRooms()
         {
-            var leaderId = reservation.Holder.RelPax.IdPax;
+            var leader = reservation.Paxes.Pax.Single(p => p.IdPax == reservation.Holder.RelPax.IdPax);
 
-            var paxes = reservation.Paxes.Pax.Select(p => (Id: p.IdPax, Pax: new Pax(title: PassengerTitles.Unspecified,
+            var paxes = reservation.Paxes.Pax.Select(p => (Id: p.IdPax, Pax: new Pax(title: GetPaxTitle(p.Title),
                     lastName: p.Surname,
                     firstName: p.Name,
-                    isLeader: p.IdPax == leaderId
-                        ? true
-                        : false,
+                    isLeader: IsLeader(p),
                     age: p.Age)))
                 .ToList();
 
@@ -57,6 +55,27 @@ public class BookingMapper
                     .ToList(),
                     supplierRoomReferenceCode: r.Source))
                 .ToList();
+
+
+            PassengerTitles GetPaxTitle(string title)
+                => title switch
+                {
+                    "MR" => PassengerTitles.Mr,
+                    "MSTR" => PassengerTitles.Mr,
+                    "MRS" => PassengerTitles.Mrs,
+                    "MISS" => PassengerTitles.Miss,
+                    _ => PassengerTitles.Unspecified
+                };
+
+
+            bool IsLeader(JP_Pax pax)
+            {
+                if (leader.Name == pax.Name && leader.Surname == pax.Surname
+                    && leader.Age == pax.Age && leader.Title == pax.Title)
+                    return true;
+
+                return false;
+            }
         }
     }
 }
