@@ -14,7 +14,6 @@ public class JuniperContext : DbContext
 
     public DbSet<Zone> Zones { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
-    public DbSet<StaticDataUpdateHistoryEntry> StaticDataUpdateHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

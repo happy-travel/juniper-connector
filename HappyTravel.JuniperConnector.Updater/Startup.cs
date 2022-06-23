@@ -49,11 +49,10 @@ public class Startup
         services.AddTransient<JuniperSerializer>();
         services.AddTransient<JuniperContext>();
         services.AddTransient<ZoneLoader>();
-        services.AddTransient<HotelsUpdater>();
+        services.AddTransient<HotelUpdater>();
         services.AddTransient<HotelLoader>();
-        services.AddTransient<UpdateHistoryService>();
 
-        services.AddTransient<IJuniperServiceClient, JuniperServiceClient>();
+        services.AddTransient<JuniperContentClientService>();
 
         services.AddHostedService<StaticDataUpdateHostedService>();
         services.AddTransient<DateTimeProvider>();
@@ -66,7 +65,6 @@ public class Startup
         services.Configure<ApiConnectionSettings>(options =>
         {
             options.StaticDataEndPoint = apiConnectionOptions["staticDataEndPoint"];
-            options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
             options.Email = apiConnectionOptions["email"];
             options.Password = apiConnectionOptions["password"];
         });

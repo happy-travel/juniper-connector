@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HappyTravel.JuniperConnector.Updater.Service;
 
-public class HotelsUpdater
+public class HotelUpdater
 {
-    public HotelsUpdater(JuniperContext context, JuniperSerializer serializer, DateTimeProvider dateTimeProvider)
+    public HotelUpdater(JuniperContext context, JuniperSerializer serializer, DateTimeProvider dateTimeProvider)
     {
         _context = context;
         _serializer = serializer;
