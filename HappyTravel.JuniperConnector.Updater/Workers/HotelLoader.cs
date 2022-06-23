@@ -1,4 +1,4 @@
-﻿using HappyTravel.JuniperConnector.Common.JuniperService;
+﻿using CSharpFunctionalExtensions;
 using HappyTravel.JuniperConnector.Updater.Infrastructure.Logging;
 using HappyTravel.JuniperConnector.Updater.Service;
 using JuniperServiceReference;
@@ -9,40 +9,30 @@ namespace HappyTravel.JuniperConnector.Updater.Workers;
 
 internal class HotelLoader : IUpdateWorker
 {
-    public HotelLoader(IJuniperServiceClient client, ILogger<HotelLoader> logger, UpdateHistoryService updateHistoryService, HotelsUpdater hotelsUpdater)
+    public HotelLoader(JuniperContentClientService client, ILogger<HotelLoader> logger, HotelUpdater hotelUpdater)
     {
         _client = client;
-        _logger = logger;        
-        _updateHistoryService = updateHistoryService;
-        _hotelsUpdater = hotelsUpdater;
+        _logger = logger;
+        _hotelUpdater = hotelUpdater;
     }
 
 
     public async Task Run(CancellationToken cancellationToken)
-    {
-        var updateId = await _updateHistoryService.Create();
-        _logger.LogStartingHotelsUpdate(updateId);
+    {        
+        _logger.LogStartingHotelsUpdate();
+               
+        _logger.LogDeactivateAllHotels();
+        await _hotelUpdater.DeactivateAllHotels(cancellationToken);            
 
-        try
+        await foreach (var hotelPortfolio in GetHotelPortfolio(cancellationToken))
         {
-            _logger.LogDeactivateAllHotels();
-            await _hotelsUpdater.DeactivateAllHotels(cancellationToken);            
+            var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
 
-            await foreach (var hotelPortfolio in GetHotelPortfolio(cancellationToken))
-            {
-                var hotelContents = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
+            if (isSuccess)
+                await _hotelUpdater.AddUpdateHotels(hotelContents, cancellationToken);
+        }            
 
-                await _hotelsUpdater.AddUpdateHotels(hotelContents, cancellationToken);
-            }            
-
-            await _updateHistoryService.SetSuccess(updateId);
-            _logger.LogFinishHotelsUpdate(updateId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogHotelLoaderException(ex);
-            await _updateHistoryService.SetError(updateId, ex);
-        }        
+        _logger.LogFinishHotelsUpdate();             
     }
 
 
@@ -51,11 +41,16 @@ internal class HotelLoader : IUpdateWorker
         string nextPageToken = null;
         do
         {
-            var hotelPortfolioResponse = await _client.GetHotelPortfolio(BatchSize, nextPageToken);
+            var (isSuccess, _, hotelPortfolioResponse, _) = await _client.GetHotelPortfolio(BatchSize, nextPageToken);
 
-            nextPageToken = hotelPortfolioResponse.NextToken;
+            if (isSuccess)
+            {
+                nextPageToken = hotelPortfolioResponse.NextToken;
 
-            yield return hotelPortfolioResponse.Hotel.ToList();
+                yield return hotelPortfolioResponse.Hotel.ToList();
+            }
+            else
+                yield break;
 
         } while (nextPageToken is not null);
     }
@@ -65,8 +60,7 @@ internal class HotelLoader : IUpdateWorker
     private const int BatchSize = 25;
 
 
-    private readonly IJuniperServiceClient _client;
-    private readonly ILogger<HotelLoader> _logger;    
-    private readonly UpdateHistoryService _updateHistoryService;
-    private readonly HotelsUpdater _hotelsUpdater;
+    private readonly JuniperContentClientService _client;
+    private readonly ILogger<HotelLoader> _logger;   
+    private readonly HotelUpdater _hotelUpdater;
 }
