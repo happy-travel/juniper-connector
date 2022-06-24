@@ -10,7 +10,7 @@
     <PackageReference Include="HappyTravel.BaseConnector.Api" Version="1.6.12" />
     <PackageReference Include="HappyTravel.ErrorHandling" Version="1.2.3" />
     <PackageReference Include="HappyTravel.HttpRequestLogger" Version="1.0.5" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.17.0" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.18.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.3.1" />
   </ItemGroup>
