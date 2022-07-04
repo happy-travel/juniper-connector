@@ -68,22 +68,23 @@
   },
   {
     "id": 40022,
-    "name": "DeactivateAllHotels",
-    "level": "Information",
-    "template": "Deactivate all hotels"
-  },
-  {
-    "id": 40023,
     "name": "HotelPortfolioRequestFailed",
     "level": "Error",
     "template": "HotelPortfolio request failed",
     "hasException": true
   },
   {
-    "id": 40024,
+    "id": 40023,
     "name": "HotelContentRequestFailed",
     "level": "Error",
     "template": "HotelContent request failed",
     "hasException": true
-  }  
+  },
+  {
+    "id": 40024,
+    "name": "DeactivatingCompleted",
+    "level": "Information",
+    "template": "Deactivated {count} hotels",
+    "argumentTypes": [ "int" ]
+  }
 ]

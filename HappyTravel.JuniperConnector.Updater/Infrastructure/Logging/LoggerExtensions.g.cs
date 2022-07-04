@@ -35,14 +35,14 @@ public static partial class LoggerExtensions
     [LoggerMessage(40021, LogLevel.Information, "Finish raw data update")]
     static partial void FinishHotelsUpdate(ILogger logger);
     
-    [LoggerMessage(40022, LogLevel.Information, "Deactivate all hotels")]
-    static partial void DeactivateAllHotels(ILogger logger);
-    
-    [LoggerMessage(40023, LogLevel.Error, "HotelPortfolio request failed")]
+    [LoggerMessage(40022, LogLevel.Error, "HotelPortfolio request failed")]
     static partial void HotelPortfolioRequestFailed(ILogger logger, System.Exception exception);
     
-    [LoggerMessage(40024, LogLevel.Error, "HotelContent request failed")]
+    [LoggerMessage(40023, LogLevel.Error, "HotelContent request failed")]
     static partial void HotelContentRequestFailed(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40024, LogLevel.Information, "Deactivated {count} hotels")]
+    static partial void DeactivatingCompleted(ILogger logger, int count);
     
     
     
@@ -76,12 +76,12 @@ public static partial class LoggerExtensions
     public static void LogFinishHotelsUpdate(this ILogger logger)
         => FinishHotelsUpdate(logger);
     
-    public static void LogDeactivateAllHotels(this ILogger logger)
-        => DeactivateAllHotels(logger);
-    
     public static void LogHotelPortfolioRequestFailed(this ILogger logger, System.Exception exception)
         => HotelPortfolioRequestFailed(logger, exception);
     
     public static void LogHotelContentRequestFailed(this ILogger logger, System.Exception exception)
         => HotelContentRequestFailed(logger, exception);
+    
+    public static void LogDeactivatingCompleted(this ILogger logger, int count)
+        => DeactivatingCompleted(logger, count);
 }
