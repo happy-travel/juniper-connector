@@ -29,20 +29,17 @@ internal class HotelLoader : IUpdateWorker
 
         await foreach (var (getHotelPortfolioHasError, hotelPortfolio) in GetHotelPortfolio(cancellationToken))
         {
-            if (!getHotelPortfolioHasError)
+            if (getHotelPortfolioHasError)
+                hasErrors = true;
+            else
             {
                 var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
 
                 if (isSuccess)
                     await _hotelUpdater.AddUpdateHotels(hotelContents, modified, cancellationToken);
                 else
-                if (!hasErrors)
-                {
                     hasErrors = true;
-                }
-            }
-            if (!hasErrors)
-                hasErrors = true;
+            }                
         }
 
         if (!hasErrors)
