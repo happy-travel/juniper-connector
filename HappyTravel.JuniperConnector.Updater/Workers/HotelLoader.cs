@@ -24,24 +24,38 @@ internal class HotelLoader : IUpdateWorker
     {        
         _logger.LogStartingHotelsUpdate();
 
+        var hasErrors = false;
         var modified = _dateTimeProvider.UtcNow();
 
-        await foreach (var hotelPortfolio in GetHotelPortfolio(cancellationToken))
+        await foreach (var (getHotelPortfolioHasError, hotelPortfolio) in GetHotelPortfolio(cancellationToken))
         {
-            var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
+            if (!getHotelPortfolioHasError)
+            {
+                var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
 
-            if (isSuccess)
-                await _hotelUpdater.AddUpdateHotels(hotelContents, modified, cancellationToken);
+                if (isSuccess)
+                    await _hotelUpdater.AddUpdateHotels(hotelContents, modified, cancellationToken);
+                else
+                if (!hasErrors)
+                {
+                    hasErrors = true;
+                }
+            }
+            if (!hasErrors)
+                hasErrors = true;
         }
 
-        var affectedRowsCount = await _hotelUpdater.DeactivateNotFetched(modified, cancellationToken);
+        if (!hasErrors)
+        {
+            var affectedRowsCount = await _hotelUpdater.DeactivateNotFetched(modified, cancellationToken);
+            _logger.LogDeactivatingCompleted(affectedRowsCount);
+        }
         
-        _logger.LogDeactivatingCompleted(affectedRowsCount);
         _logger.LogFinishHotelsUpdate();             
     }
 
 
-    private async IAsyncEnumerable<List<JP_ExtendedHotelInfo>> GetHotelPortfolio([EnumeratorCancellation] CancellationToken cancellationToken)
+    private async IAsyncEnumerable<(bool HasError, List<JP_ExtendedHotelInfo>)> GetHotelPortfolio([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         string nextPageToken = null;
         do
@@ -52,10 +66,10 @@ internal class HotelLoader : IUpdateWorker
             {
                 nextPageToken = hotelPortfolioResponse.NextToken;
 
-                yield return hotelPortfolioResponse.Hotel.ToList();
+                yield return (false, hotelPortfolioResponse.Hotel.ToList());
             }
             else
-                yield break;
+                yield return (true, default);
 
         } while (nextPageToken is not null);
     }
