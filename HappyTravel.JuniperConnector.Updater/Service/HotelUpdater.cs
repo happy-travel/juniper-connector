@@ -1,6 +1,5 @@
 ﻿using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Data;
-using HappyTravel.JuniperConnector.Updater.Infrastructure;
 using JuniperServiceReference;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,15 +7,14 @@ namespace HappyTravel.JuniperConnector.Updater.Service;
 
 public class HotelUpdater
 {
-    public HotelUpdater(JuniperContext context, JuniperSerializer serializer, DateTimeProvider dateTimeProvider)
+    public HotelUpdater(JuniperContext context, JuniperSerializer serializer)
     {
         _context = context;
         _serializer = serializer;
-        _dateTimeProvider = dateTimeProvider;
     }
 
 
-    public async Task AddUpdateHotels(List<JP_HotelContent> hotels, CancellationToken cancellationToken)
+    public async Task AddUpdateHotels(List<JP_HotelContent> hotels, DateTimeOffset modified, CancellationToken cancellationToken)
     {
         foreach (var hotel in hotels)
         {
@@ -25,7 +23,7 @@ public class HotelUpdater
             if (updateHotel is not null)
             {
                 updateHotel.Data = _serializer.Serialize(hotel);
-                updateHotel.Modified = _dateTimeProvider.UtcNow();
+                updateHotel.Modified = modified;
                 updateHotel.IsActive = true;
 
                 _context.Update(updateHotel);
@@ -36,7 +34,7 @@ public class HotelUpdater
                 {
                     Code = hotel.Code,
                     Data = _serializer.Serialize(hotel),
-                    Modified = _dateTimeProvider.UtcNow(),
+                    Modified = modified,
                     IsActive = true
                 }, cancellationToken);
             }
@@ -47,17 +45,13 @@ public class HotelUpdater
     }
 
 
-    public async Task DeactivateAllHotels(CancellationToken cancellationToken)
-    {
-        var entityType = _context.Model.FindEntityType(typeof(Data.Models.Hotel));
-        var tableName = entityType.GetTableName();
+    public async Task<int> DeactivateNotFetched(DateTimeOffset modified, CancellationToken cancellationToken)
+       => await _context.Database.ExecuteSqlInterpolatedAsync(
+            @$"UPDATE ""Hotels"" SET ""IsActive"" = false WHERE ""IsActive"" = true AND ""Modified"" < {modified}", 
+            cancellationToken);
 
-        await _context.Database.ExecuteSqlRawAsync($"UPDATE \"{tableName}\" SET \"IsActive\" = false",
-            cancellationToken: cancellationToken);
-    }
 
 
     private readonly JuniperContext _context;
     private readonly JuniperSerializer _serializer;
-    private readonly DateTimeProvider _dateTimeProvider;
 }

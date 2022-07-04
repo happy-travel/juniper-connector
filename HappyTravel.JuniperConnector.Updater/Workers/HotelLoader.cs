@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using HappyTravel.JuniperConnector.Updater.Infrastructure;
 using HappyTravel.JuniperConnector.Updater.Infrastructure.Logging;
 using HappyTravel.JuniperConnector.Updater.Service;
 using JuniperServiceReference;
@@ -9,29 +10,33 @@ namespace HappyTravel.JuniperConnector.Updater.Workers;
 
 internal class HotelLoader : IUpdateWorker
 {
-    public HotelLoader(JuniperContentClientService client, ILogger<HotelLoader> logger, HotelUpdater hotelUpdater)
+    public HotelLoader(JuniperContentClientService client, ILogger<HotelLoader> logger, HotelUpdater hotelUpdater,
+        DateTimeProvider dateTimeProvider)
     {
         _client = client;
         _logger = logger;
         _hotelUpdater = hotelUpdater;
+        _dateTimeProvider = dateTimeProvider;
     }
 
 
     public async Task Run(CancellationToken cancellationToken)
     {        
         _logger.LogStartingHotelsUpdate();
-               
-        _logger.LogDeactivateAllHotels();
-        await _hotelUpdater.DeactivateAllHotels(cancellationToken);            
+
+        var modified = _dateTimeProvider.UtcNow();
 
         await foreach (var hotelPortfolio in GetHotelPortfolio(cancellationToken))
         {
             var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
 
             if (isSuccess)
-                await _hotelUpdater.AddUpdateHotels(hotelContents, cancellationToken);
-        }            
+                await _hotelUpdater.AddUpdateHotels(hotelContents, modified, cancellationToken);
+        }
 
+        var affectedRowsCount = await _hotelUpdater.DeactivateNotFetched(modified, cancellationToken);
+        
+        _logger.LogDeactivatingCompleted(affectedRowsCount);
         _logger.LogFinishHotelsUpdate();             
     }
 
@@ -63,4 +68,5 @@ internal class HotelLoader : IUpdateWorker
     private readonly JuniperContentClientService _client;
     private readonly ILogger<HotelLoader> _logger;   
     private readonly HotelUpdater _hotelUpdater;
+    private readonly DateTimeProvider _dateTimeProvider;
 }
