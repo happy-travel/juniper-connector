@@ -1,71 +1,67 @@
-﻿using HappyTravel.JuniperConnector.Common.Infrastructure;
-using HappyTravel.JuniperConnector.Common.Settings;
+﻿using HappyTravel.JuniperConnector.Common.Settings;
 using JuniperServiceReference;
-using Microsoft.Extensions.Options;
+using System.ServiceModel;
 
-namespace HappyTravel.JuniperConnector.Common.JuniperService;
-
-public class JuniperServiceClient : IJuniperServiceClient
+namespace HappyTravel.JuniperConnector.Common.JuniperService
 {
-    public JuniperServiceClient(IHttpMessageHandlerFactory factory, IOptions<ApiConnectionSettings> options)
+    public abstract class JuniperServiceClient
     {
-        _options = options.Value;
-        _staticDataClient = InitializeStaticDataClient(factory);        
-        _availClient = InitializeAvailClient(factory);
-        _login = GetLogin();
-    }
-
-
-    public async Task<List<JP_Zone>> GetZoneList()
-    {
-        var response = await GetZoneListResponse(new JP_ZoneListRQ
+        public JuniperServiceClient(IHttpMessageHandlerFactory factory, ApiConnectionSettings options)
         {
-            Language = Constants.DefaultLanguageCode,
-            Login = _login,
-            ZoneListRequest = new JP_ZoneListRequest
+            _factory = factory;
+            _options = options;
+            _login = GetLogin();
+        }
+
+
+        protected void ConfigureClient<T>(ClientBase<T> client, string clientName) where T : class
+        {
+            client.Endpoint.EndpointBehaviors.Add(new HttpMessageHandlerBehavior(_factory, clientName));
+        }
+
+
+        protected BasicHttpBinding GetBasicHttpBinding(string name)
+            => new BasicHttpBinding(BasicHttpSecurityMode.Transport)
             {
-                ProductType = JP_ProductType.HOT,
-                ShowIATA = true,
-                MaxLevel = 1
-            }
-        });
-
-        return response.ZoneList.ToList();
-    }
+                Name = name,
+                MaxReceivedMessageSize = MaxReceivedMessageSizeBytes,
+                MaxBufferPoolSize = MaxBufferPoolSizeBytes,
+                MaxBufferSize = MaxBufferSizeBytes,
+                SendTimeout = TimeSpan.FromMinutes(SendTimeoutMinutes)
+            };
 
 
-    private async Task<JP_StaticDataRS> GetZoneListResponse(JP_ZoneListRQ request)
-    {
-        return await _staticDataClient.ZoneListAsync(request);
-    }
-    private JP_Login GetLogin()
-        => new JP_Login
+        protected EndpointAddress GetEndpointAddress(string endPoint)
+            => new EndpointAddress(new Uri(endPoint));
+
+
+        protected string GetErrorMessage(JP_ErrorType[] errors)
         {
-            Email = _options.Email,
-            Password = _options.Password
-        };
+            const string errorMessage = "Code: `{0}`, Text: `{1}`, Type: `{2}`";
+            var errorMessages = errors.Select(error =>
+                 string.Format(errorMessage, error.Code, error.Text, error.Type))
+            .ToList();
+
+            return string.Join("; ", errorMessages);
+        }
 
 
-    public StaticDataTransactionsClient InitializeStaticDataClient(IHttpMessageHandlerFactory factory)
-        => JuniperServiceExtensions.InitializeClient<StaticDataTransactionsClient, StaticDataTransactions>(
-            client: _staticDataClient,
-            basicHttpBindingName: "JuniperStaticDataServiceSoap",
-            endPoint: _options.StaticDataEndPoint,
-            factory: factory,
-            clientName: Constants.HttpStaticDataClientNames);    
+        private JP_Login GetLogin()
+            => new JP_Login
+            {
+                Email = _options.Email,
+                Password = _options.Password
+            };
 
 
-    public AvailTransactionsClient InitializeAvailClient(IHttpMessageHandlerFactory factory)
-        => JuniperServiceExtensions.InitializeClient<AvailTransactionsClient, AvailTransactions>(
-            client: _availClient,
-            basicHttpBindingName: "JuniperAvailServiceSoap",
-            endPoint: _options.AvailEndPoint,
-            factory: factory,
-            clientName: Constants.HttpAvailClientNames);    
+        private const long MaxReceivedMessageSizeBytes = 20000000;
+        private const long MaxBufferPoolSizeBytes = 20000000;
+        private const int MaxBufferSizeBytes = 20000000;
+        private const int SendTimeoutMinutes = 5;
 
 
-    private readonly StaticDataTransactionsClient _staticDataClient;
-    private readonly AvailTransactionsClient _availClient;
-    private readonly ApiConnectionSettings _options;
-    private readonly JP_Login _login;
+        private readonly IHttpMessageHandlerFactory _factory;
+        protected readonly ApiConnectionSettings _options;
+        protected readonly JP_Login _login;
+    }
 }

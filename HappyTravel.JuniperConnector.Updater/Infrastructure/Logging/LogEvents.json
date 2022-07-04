@@ -36,18 +36,55 @@
     "argumentTypes": [ "string" ]
   },
   {
-    "id": 40006,
+    "id": 40010,
     "name": "StartingZonesUpdate",
     "level": "Information",
-    "template": "Starting raw data zone update",
-    "argumentTypes": []
+    "template": "Starting raw data zone update"
   },
   {
-    "id": 40007,
-    "name": "ZoneLoaderException",
-    "level": "Critical",
-    "template": "Zone loader: ",
-    "argumentTypes": [],
+    "id": 40011,
+    "name": "FinishZonesUpdate",
+    "level": "Information",
+    "template": "Finish raw data zone update"
+  },
+  {
+    "id": 40012,
+    "name": "ZoneListRequestFailed",
+    "level": "Error",
+    "template": "ZoneList request failed",
     "hasException": true
+  },
+  {
+    "id": 40020,
+    "name": "StartingHotelsUpdate",
+    "level": "Information",
+    "template": "Starting raw data hotels update"
+  },
+  {
+    "id": 40021,
+    "name": "FinishHotelsUpdate",
+    "level": "Information",
+    "template": "Finish raw data update"
+  },
+  {
+    "id": 40022,
+    "name": "HotelPortfolioRequestFailed",
+    "level": "Error",
+    "template": "HotelPortfolio request failed",
+    "hasException": true
+  },
+  {
+    "id": 40023,
+    "name": "HotelContentRequestFailed",
+    "level": "Error",
+    "template": "HotelContent request failed",
+    "hasException": true
+  },
+  {
+    "id": 40024,
+    "name": "DeactivatingCompleted",
+    "level": "Information",
+    "template": "Deactivated {count} hotels",
+    "argumentTypes": [ "int" ]
   }
 ]
