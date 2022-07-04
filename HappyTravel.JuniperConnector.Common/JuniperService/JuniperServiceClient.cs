@@ -27,7 +27,7 @@ namespace HappyTravel.JuniperConnector.Common.JuniperService
                 MaxReceivedMessageSize = MaxReceivedMessageSizeBytes,
                 MaxBufferPoolSize = MaxBufferPoolSizeBytes,
                 MaxBufferSize = MaxBufferSizeBytes,
-                SendTimeout = TimeSpan.FromMinutes(5)
+                SendTimeout = TimeSpan.FromMinutes(SendTimeoutMinutes)
             };
 
 
@@ -57,6 +57,7 @@ namespace HappyTravel.JuniperConnector.Common.JuniperService
         private const long MaxReceivedMessageSizeBytes = 20000000;
         private const long MaxBufferPoolSizeBytes = 20000000;
         private const int MaxBufferSizeBytes = 20000000;
+        private const int SendTimeoutMinutes = 5;
 
 
         private readonly IHttpMessageHandlerFactory _factory;
