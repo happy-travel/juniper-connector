@@ -3,8 +3,8 @@ using System;
 using HappyTravel.JuniperConnector.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -12,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HappyTravel.JuniperConnector.Data.Migrations
 {
     [DbContext(typeof(JuniperContext))]
-    partial class JuniperContextModelSnapshot : ModelSnapshot
+    [Migration("20220623061836_RemoveStaticDataUpdateHistoryTable")]
+    partial class RemoveStaticDataUpdateHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,34 +23,6 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Accommodation", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("text");
-
-                    b.Property<Point>("Coordinates")
-                        .IsRequired()
-                        .HasColumnType("geometry");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Locality")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("Modified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("Accommodations");
-                });
 
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Hotel", b =>
                 {
@@ -78,17 +51,11 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
-                    b.Property<int>("AreaType")
-                        .HasColumnType("integer");
-
                     b.Property<string>("IATA")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ParentCode")
                         .HasColumnType("text");
 
                     b.HasKey("Code");

@@ -1,4 +1,5 @@
-﻿using HappyTravel.JuniperConnector.Common.JuniperService;
+﻿using CSharpFunctionalExtensions;
+using HappyTravel.JuniperConnector.Updater.Infrastructure;
 using HappyTravel.JuniperConnector.Updater.Infrastructure.Logging;
 using HappyTravel.JuniperConnector.Updater.Service;
 using JuniperServiceReference;
@@ -9,53 +10,63 @@ namespace HappyTravel.JuniperConnector.Updater.Workers;
 
 internal class HotelLoader : IUpdateWorker
 {
-    public HotelLoader(IJuniperServiceClient client, ILogger<HotelLoader> logger, UpdateHistoryService updateHistoryService, HotelsUpdater hotelsUpdater)
+    public HotelLoader(JuniperContentClientService client, ILogger<HotelLoader> logger, HotelUpdater hotelUpdater,
+        DateTimeProvider dateTimeProvider)
     {
         _client = client;
-        _logger = logger;        
-        _updateHistoryService = updateHistoryService;
-        _hotelsUpdater = hotelsUpdater;
+        _logger = logger;
+        _hotelUpdater = hotelUpdater;
+        _dateTimeProvider = dateTimeProvider;
     }
 
 
     public async Task Run(CancellationToken cancellationToken)
-    {
-        var updateId = await _updateHistoryService.Create();
-        _logger.LogStartingHotelsUpdate(updateId);
+    {        
+        _logger.LogStartingHotelsUpdate();
 
-        try
+        var hasErrors = false;
+        var modified = _dateTimeProvider.UtcNow();
+
+        await foreach (var (getHotelPortfolioHasError, hotelPortfolio) in GetHotelPortfolio(cancellationToken))
         {
-            _logger.LogDeactivateAllHotels();
-            await _hotelsUpdater.DeactivateAllHotels(cancellationToken);            
-
-            await foreach (var hotelPortfolio in GetHotelPortfolio(cancellationToken))
+            if (getHotelPortfolioHasError)
+                hasErrors = true;
+            else
             {
-                var hotelContents = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
+                var (isSuccess, _, hotelContents, _) = await _client.GetHotelContents(hotelPortfolio.Select(x => x.JPCode));
 
-                await _hotelsUpdater.AddUpdateHotels(hotelContents, cancellationToken);
-            }            
-
-            await _updateHistoryService.SetSuccess(updateId);
-            _logger.LogFinishHotelsUpdate(updateId);
+                if (isSuccess)
+                    await _hotelUpdater.AddUpdateHotels(hotelContents, modified, cancellationToken);
+                else
+                    hasErrors = true;
+            }                
         }
-        catch (Exception ex)
+
+        if (!hasErrors)
         {
-            _logger.LogHotelLoaderException(ex);
-            await _updateHistoryService.SetError(updateId, ex);
-        }        
+            var affectedRowsCount = await _hotelUpdater.DeactivateNotFetched(modified, cancellationToken);
+            _logger.LogDeactivatingCompleted(affectedRowsCount);
+        }
+        
+        _logger.LogFinishHotelsUpdate();             
     }
 
 
-    private async IAsyncEnumerable<List<JP_ExtendedHotelInfo>> GetHotelPortfolio([EnumeratorCancellation] CancellationToken cancellationToken)
+    private async IAsyncEnumerable<(bool HasError, List<JP_ExtendedHotelInfo>)> GetHotelPortfolio([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         string nextPageToken = null;
         do
         {
-            var hotelPortfolioResponse = await _client.GetHotelPortfolio(BatchSize, nextPageToken);
+            var (isSuccess, _, hotelPortfolioResponse, _) = await _client.GetHotelPortfolio(BatchSize, nextPageToken);
 
-            nextPageToken = hotelPortfolioResponse.NextToken;
+            if (isSuccess)
+            {
+                nextPageToken = hotelPortfolioResponse.NextToken;
 
-            yield return hotelPortfolioResponse.Hotel.ToList();
+                yield return (false, hotelPortfolioResponse.Hotel.ToList());
+            }
+            else
+                yield return (true, default);
 
         } while (nextPageToken is not null);
     }
@@ -65,8 +76,8 @@ internal class HotelLoader : IUpdateWorker
     private const int BatchSize = 25;
 
 
-    private readonly IJuniperServiceClient _client;
-    private readonly ILogger<HotelLoader> _logger;    
-    private readonly UpdateHistoryService _updateHistoryService;
-    private readonly HotelsUpdater _hotelsUpdater;
+    private readonly JuniperContentClientService _client;
+    private readonly ILogger<HotelLoader> _logger;   
+    private readonly HotelUpdater _hotelUpdater;
+    private readonly DateTimeProvider _dateTimeProvider;
 }
