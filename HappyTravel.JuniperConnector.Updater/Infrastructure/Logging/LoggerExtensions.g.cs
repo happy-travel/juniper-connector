@@ -53,6 +53,9 @@ public static partial class LoggerExtensions
     [LoggerMessage(40027, LogLevel.Information, "Get hotels from DB. From {i} to {batchSizeInc}")]
     static partial void AccommodationUpdaterGetHotels(ILogger logger, int i, int batchSizeInc);
     
+    [LoggerMessage(40028, LogLevel.Information, "Point parse failed: {latitude}, {longitude}")]
+    static partial void PointParseFailed(ILogger logger, string latitude, string longitude);
+    
     
     
     public static void LogStartedWorker(this ILogger logger, string workerName)
@@ -102,4 +105,7 @@ public static partial class LoggerExtensions
     
     public static void LogAccommodationUpdaterGetHotels(this ILogger logger, int i, int batchSizeInc)
         => AccommodationUpdaterGetHotels(logger, i, batchSizeInc);
+    
+    public static void LogPointParseFailed(this ILogger logger, string latitude, string longitude)
+        => PointParseFailed(logger, latitude, longitude);
 }

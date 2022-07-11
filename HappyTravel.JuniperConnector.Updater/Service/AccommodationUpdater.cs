@@ -74,33 +74,42 @@ public class AccommodationUpdater : IUpdateWorker
 
         var (country, locality) = GetCountryAndLocality(data.Zone.Code, zones);
 
+        var point = GetPoint(data?.Address?.Latitude, data?.Address?.Longitude);
+
+        if (point is null)
+        {
+            _logger.LogPointParseFailed(data?.Address?.Latitude, data?.Address?.Longitude);
+            point = new Point(0, 0);
+        }
+
+
         return new Accommodation
         {
             Code = hotel.Code,
             Country = country,
             Locality = locality,
             Name = data.HotelName,
-            Coordinates = GetPoint(data?.Address?.Latitude, data?.Address?.Longitude),
+            Coordinates = point,
             Modified = _dateTimeProvider.UtcNow()
         };
 
 
-        static Point GetPoint(string latitudeString, string longitudeString)
+        static Point? GetPoint(string latitudeString, string longitudeString)
             => double.TryParse(latitudeString, out double latitude) && double.TryParse(longitudeString, out double longitude)
-            ? new Point(latitude, longitude)
-            : new Point(0, 0);
+                ? new Point(latitude, longitude)
+                : null;
 
 
         static (string, string) GetCountryAndLocality(string zoneCode, List<Zone> zones)
         {
             Zone zone;
-            var zoneHierarchy = new List<Zone>();            
+            var zoneHierarchy = new List<Zone>();
 
             do
             {
                 zone = zones.Single(x => x.Code == zoneCode);
                 zoneHierarchy.Add(zone);
-                zoneCode = zone.ParentCode;                
+                zoneCode = zone.ParentCode;
             } while (zone.ParentCode != null);
 
             var countryZone = zoneHierarchy.FirstOrDefault(x => CountryAreaTypes.Contains(x.AreaType));
