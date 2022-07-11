@@ -108,5 +108,12 @@
     "level": "Information",
     "template": "Get hotels from DB. From {i} to {batchSizeInc}",
     "argumentTypes": [ "int", "int" ]
+  },
+  {
+    "id": 40028,
+    "name": "PointParseFailed",
+    "level": "Information",
+    "template": "Point parse failed: {latitude}, {longitude}",
+    "argumentTypes": [ "string", "string" ]
   }
 ]
