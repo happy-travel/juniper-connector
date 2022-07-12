@@ -23,7 +23,7 @@ RUN dotnet build HappyTravel.JuniperConnector.Common -c $Configuration --no-rest
     dotnet build HappyTravel.JuniperConnector.Data -c $Configuration --no-restore --no-dependencies 
     
 
-FROM giata.dependencies AS publish
+FROM juniper.dependencies AS publish
 ARG Configuration=Release
 ARG GITHUB_TOKEN
 WORKDIR /src
