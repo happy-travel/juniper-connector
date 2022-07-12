@@ -86,5 +86,34 @@
     "level": "Information",
     "template": "Deactivated {count} hotels",
     "argumentTypes": [ "int" ]
+  },
+  {
+    "id": 40025,
+    "name": "StartingAccommodationUpdater",
+    "level": "Information",
+    "template": "Starting accommodation updater",
+    "argumentTypes": []
+  },
+  {
+    "id": 40026,
+    "name": "AccommodationUpdaterException",
+    "level": "Critical",
+    "template": "Accommodation updater: ",
+    "argumentTypes": [],
+    "hasException": true
+  },
+  {
+    "id": 40027,
+    "name": "AccommodationUpdaterGetHotels",
+    "level": "Information",
+    "template": "Get hotels from DB. From {i} to {batchSizeInc}",
+    "argumentTypes": [ "int", "int" ]
+  },
+  {
+    "id": 40028,
+    "name": "PointParseFailed",
+    "level": "Information",
+    "template": "Point parse failed: {latitude}, {longitude}",
+    "argumentTypes": [ "string", "string" ]
   }
 ]
