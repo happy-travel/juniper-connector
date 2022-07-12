@@ -44,6 +44,18 @@ public static partial class LoggerExtensions
     [LoggerMessage(40024, LogLevel.Information, "Deactivated {count} hotels")]
     static partial void DeactivatingCompleted(ILogger logger, int count);
     
+    [LoggerMessage(40025, LogLevel.Information, "Starting accommodation updater")]
+    static partial void StartingAccommodationUpdater(ILogger logger);
+    
+    [LoggerMessage(40026, LogLevel.Critical, "Accommodation updater: ")]
+    static partial void AccommodationUpdaterException(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40027, LogLevel.Information, "Get hotels from DB. From {i} to {batchSizeInc}")]
+    static partial void AccommodationUpdaterGetHotels(ILogger logger, int i, int batchSizeInc);
+    
+    [LoggerMessage(40028, LogLevel.Information, "Point parse failed: {latitude}, {longitude}")]
+    static partial void PointParseFailed(ILogger logger, string latitude, string longitude);
+    
     
     
     public static void LogStartedWorker(this ILogger logger, string workerName)
@@ -84,4 +96,16 @@ public static partial class LoggerExtensions
     
     public static void LogDeactivatingCompleted(this ILogger logger, int count)
         => DeactivatingCompleted(logger, count);
+    
+    public static void LogStartingAccommodationUpdater(this ILogger logger)
+        => StartingAccommodationUpdater(logger);
+    
+    public static void LogAccommodationUpdaterException(this ILogger logger, System.Exception exception)
+        => AccommodationUpdaterException(logger, exception);
+    
+    public static void LogAccommodationUpdaterGetHotels(this ILogger logger, int i, int batchSizeInc)
+        => AccommodationUpdaterGetHotels(logger, i, batchSizeInc);
+    
+    public static void LogPointParseFailed(this ILogger logger, string latitude, string longitude)
+        => PointParseFailed(logger, latitude, longitude);
 }
