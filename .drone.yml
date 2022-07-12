@@ -40,6 +40,22 @@ steps:
   when:
     status: [success, failure]
 
+- name: send telegram notification
+  image: appleboy/drone-telegram
+  settings:
+    token: 
+      from_secret: TELEGRAM_TOKEN
+    to: 
+      from_secret: TELEGRAM_GROUP_ID
+    message: >
+      {{#success build.status}}
+        ✅ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` succeeded. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{else}}
+        ❌ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` failed. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{/success}}
+  when:
+    status: [success, failure]  
+
 ---
 kind: pipeline
 type: docker
@@ -174,6 +190,21 @@ steps:
   when:
     status: [success, failure]
 
+- name: send telegram notification
+  image: appleboy/drone-telegram
+  settings:
+    token: 
+      from_secret: TELEGRAM_TOKEN
+    to: 
+      from_secret: TELEGRAM_GROUP_ID
+    message: >
+      {{#success build.status}}
+        ✅ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` succeeded. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{else}}
+        ❌ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` failed. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{/success}}
+  when:
+    status: [success, failure]    
 ---
 kind: pipeline
 type: docker
@@ -311,6 +342,22 @@ steps:
   when:
     status: [success, failure]
 
+- name: send telegram notification
+  image: appleboy/drone-telegram
+  settings:
+    token: 
+      from_secret: TELEGRAM_TOKEN
+    to: 
+      from_secret: TELEGRAM_GROUP_ID
+    message: >
+      {{#success build.status}}
+        ✅ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` on production succeeded. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{else}}
+        ❌ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` on production failed. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{/success}}    
+  when:
+    status: [success, failure]    
+
 ---
 kind: pipeline
 type: kubernetes
@@ -443,5 +490,21 @@ steps:
       from_secret: DISCORD_WEBHOOK_ID
     webhook_token:
       from_secret: DISCORD_WEBHOOK_TOKEN
+  when:
+    status: [success, failure]
+
+- name: send telegram notification
+  image: appleboy/drone-telegram
+  settings:
+    token: 
+      from_secret: TELEGRAM_TOKEN
+    to: 
+      from_secret: TELEGRAM_GROUP_ID
+    message: >
+      {{#success build.status}}
+        ✅ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` on staging succeeded. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{else}}
+        ❌ Build {{build.number}} `{{ build.event }}` of `{{repo.name}}` on staging failed. Commit by {{commit.author}} on `{{commit.branch}}` ``` {{commit.message}} ``` {{ build.link }}
+      {{/success}}    
   when:
     status: [success, failure]
