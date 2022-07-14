@@ -1,4 +1,5 @@
-﻿using HappyTravel.BaseConnector.Api.Infrastructure.Environment;
+using System.Reflection;
+using HappyTravel.BaseConnector.Api.Infrastructure.Environment;
 using HappyTravel.BaseConnector.Api.Infrastructure.Extensions;
 using HappyTravel.BaseConnector.Api.Services.Accommodations;
 using HappyTravel.BaseConnector.Api.Services.Availabilities.AccommodationAvailabilities;
@@ -18,39 +19,31 @@ using HappyTravel.JuniperConnector.Api.Services.Bookings;
 using HappyTravel.JuniperConnector.Api.Services.Locations;
 using HappyTravel.VaultClient;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 
-namespace HappyTravel.JuniperConnector.Api;
+namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
-public class Startup
+public static class ServicesConfigurationExtensions
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    public static void ConfigureServices(this WebApplicationBuilder builder)
     {
-        Configuration = configuration;
-        HostEnvironment = hostEnvironment;
-    }
-
-
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddControllers();
-        services.AddProblemDetailsErrorHandling();
+        builder.Services.AddControllers();
+        builder.Services.AddProblemDetailsErrorHandling();
 
         using var vaultClient = new VaultClient.VaultClient(new VaultOptions
         {
-            BaseUrl = new Uri(EnvironmentVariableHelper.Get("Vault:Endpoint", Configuration) ??
+            BaseUrl = new Uri(EnvironmentVariableHelper.Get("Vault:Endpoint", builder.Configuration) ??
                                 throw new Exception("Could not find vault endpoint environment variable")),
-            Engine = Configuration["Vault:Engine"],
-            Role = Configuration["Vault:Role"]
+            Engine = builder.Configuration["Vault:Engine"],
+            Role = builder.Configuration["Vault:Role"]
         });
 
-        vaultClient.Login(EnvironmentVariableHelper.Get("Vault:Token", Configuration), LoginMethods.Token)?.GetAwaiter().GetResult();
+        vaultClient.Login(EnvironmentVariableHelper.Get("Vault:Token", builder.Configuration), LoginMethods.Token)?.GetAwaiter().GetResult();
 
-        services.AddBaseConnectorServices(Configuration, HostEnvironment, vaultClient, Program.ConnectorName);
+        builder.Services.AddBaseConnectorServices(builder.Configuration, builder.Environment, vaultClient, Connector.Name);
 
-        services.AddTransient<HttpRequestLoggingHandler>();
+        builder.Services.AddTransient<HttpRequestLoggingHandler>();
 
-        services.AddTransient<IAccommodationService, AccommodationService>()
+        builder.Services.AddTransient<IAccommodationService, AccommodationService>()
           .AddTransient<IAccommodationAvailabilityService, AccommodationAvailabilityService>()
           .AddTransient<IDeadlineService, DeadlineService>()
           .AddTransient<IRoomContractSetAvailabilityService, RoomContractSetAvailabilityService>()
@@ -58,9 +51,9 @@ public class Startup
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
 
-        services.AddHealthChecks();
+        builder.Services.AddHealthChecks();
 
-        services.AddSwaggerGen(options =>
+        builder.Services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1.0", new OpenApiInfo { Title = "HappyTravel.com Juniper API", Version = "v1.0" });
 
@@ -95,27 +88,6 @@ public class Startup
             });
         });
 
-        services.AddSwaggerGenNewtonsoftSupport();
+        builder.Services.AddSwaggerGenNewtonsoftSupport();
     }
-
-
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
-    {
-        var logger = loggerFactory.CreateLogger<Startup>();
-
-        app.UseProblemDetailsExceptionHandler(env, logger);
-
-        app.ConfigureBaseConnector();
-
-        app.UseSwagger()
-            .UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1.0/swagger.json", "HappyTravel.com Juniper Connector API");
-                options.RoutePrefix = string.Empty;
-            });
-    }
-
-
-    public IConfiguration Configuration { get; }
-    public IHostEnvironment HostEnvironment { get; }
 }

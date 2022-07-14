@@ -1,0 +1,29 @@
+cronjob:
+  crons:
+    - name: "one"
+      schedule: "0 0 * * 0"
+      suspend: true
+
+concurrencyPolicy: Replace
+
+image:
+  repository: registry.happytravel.com/juniper-connector-updater
+  imagePullSecrets: travel-registry
+  restartPolicy: Never
+  pullPolicy: Always
+  tag: latest
+
+resources:
+  limits:
+    cpu: 600m
+    memory: 512Mi
+  requests:
+     cpu: 100m
+     memory: 512Mi
+
+env:
+  ASPNETCORE_URLS: http://*:80
+  ASPNETCORE_ENVIRONMENT: "Development"
+  HTDC_VAULT_ENDPOINT: "https://vault.dev.happytravel.com/v1/"
+  HTDC_REDIS_HOST: "redis-jc"
+  CONSUL_HTTP_ADDR: "https://consul-dev.happytravel.com/"

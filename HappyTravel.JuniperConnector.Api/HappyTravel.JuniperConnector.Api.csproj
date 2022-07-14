@@ -1,13 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HappyTravel.BaseConnector.Api" Version="1.5.2" />
+    <PackageReference Include="HappyTravel.BaseConnector.Api" Version="1.7.0" />
     <PackageReference Include="HappyTravel.ErrorHandling" Version="1.2.3" />
     <PackageReference Include="HappyTravel.HttpRequestLogger" Version="1.0.5" />
     <PackageReference Include="Sentry.AspNetCore" Version="3.17.0" />
