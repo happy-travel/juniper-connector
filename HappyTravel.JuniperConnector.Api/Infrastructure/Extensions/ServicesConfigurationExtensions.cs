@@ -1,4 +1,3 @@
-using System.Reflection;
 using HappyTravel.BaseConnector.Api.Infrastructure.Environment;
 using HappyTravel.BaseConnector.Api.Infrastructure.Extensions;
 using HappyTravel.BaseConnector.Api.Services.Accommodations;
@@ -20,8 +19,6 @@ using HappyTravel.JuniperConnector.Api.Services.Locations;
 using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
@@ -29,9 +26,6 @@ public static class ServicesConfigurationExtensions
 {
     public static void ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddControllers();
-        builder.Services.AddProblemDetailsErrorHandling();
-
         using var vaultClient = new VaultClient.VaultClient(new VaultOptions
         {
             BaseUrl = new Uri(EnvironmentVariableHelper.Get("Vault:Endpoint", builder.Configuration) ??
@@ -57,69 +51,11 @@ public static class ServicesConfigurationExtensions
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
 
-        builder.Services.AddHealthChecks();
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<JuniperContext>();
 
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc("v1.0", new OpenApiInfo { Title = "HappyTravel.com Juniper API", Version = "v1.0" });
-
-            var xmlCommentsFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlCommentsFilePath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFileName);
-
-            options.IncludeXmlComments(xmlCommentsFilePath);
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        },
-                        Scheme = "oauth2",
-                        Name = "Bearer",
-                        In = ParameterLocation.Header,
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
-
-        builder.Services.AddSwaggerGenNewtonsoftSupport();
-
-        ConfigureDatabaseOptions(builder.Services, vaultClient, builder);
-    }
-
-
-    private static void ConfigureDatabaseOptions(IServiceCollection services, VaultClient.VaultClient vaultClient, WebApplicationBuilder builder)
-    {
-        var databaseOptions = vaultClient.Get(builder.Configuration["Database:Options"]).GetAwaiter().GetResult();
-
-        services.AddDbContext<JuniperContext>(options =>
-        {
-            var host = databaseOptions["host"];
-            var port = databaseOptions["port"];
-            var password = databaseOptions["password"];
-            var userId = databaseOptions["userId"];
-
-            var connectionString = builder.Configuration["Database:ConnectionString"];
-            options.UseNpgsql(string.Format(connectionString, host, port, userId, password), builder =>
-            {
-                builder.UseNetTopologySuite();
-                builder.EnableRetryOnFailure();
-            });
-            options.UseInternalServiceProvider(null);
-            options.EnableSensitiveDataLogging(false);
-            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        }, ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+        builder.Services.AddProblemDetailsErrorHandling()
+           .ConfigureSwagger()
+           .ConfigureDatabaseOptions(vaultClient, builder.Configuration);
     }
 }
