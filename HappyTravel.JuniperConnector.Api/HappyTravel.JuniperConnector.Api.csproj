@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HappyTravel.JuniperConnector.Common\HappyTravel.JuniperConnector.Common.csproj" />
     <ProjectReference Include="..\HappyTravel.JuniperConnector.Data\HappyTravel.JuniperConnector.Data.csproj" />
   </ItemGroup>
 
