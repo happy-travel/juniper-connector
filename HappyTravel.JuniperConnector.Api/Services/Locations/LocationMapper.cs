@@ -40,7 +40,7 @@ public class LocationMapper
 
     private string GetDefaultLocalizedName(string name)
     {
-        var localizedName = new Dictionary<string, string> { { Constants.DefaultLanguageCode, name } };
+        var localizedName = new Dictionary<string, string> { { Common.Constants.DefaultLanguageCode, name } };
         return _serializer.Serialize(localizedName);
     }
 

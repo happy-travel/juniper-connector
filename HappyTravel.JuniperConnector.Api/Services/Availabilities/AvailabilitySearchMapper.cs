@@ -23,7 +23,7 @@ public class AvailabilitySearchMapper
 
     public async Task<Availability> MapToAvailability(AvailabilityRequest availabilityRequest, List<JP_Results> responses)
     {
-        var hotelResults = responses.SelectMany(r=>r.Items)
+        var hotelResults = responses.SelectMany(r => r.Items)
             .Select(hotelResult => (JP_HotelResult)hotelResult)
             .ToList();
 
@@ -45,11 +45,12 @@ public class AvailabilitySearchMapper
 
         await _availabilitySearchResultStorage.Set(availabilityId, cachedAccommodationAvailabilities);
 
-        return new Availability(availabilityId: availabilityId, 
+        return new Availability(availabilityId: availabilityId,
             numberOfNights: numberOfNights,
             checkInDate: availabilityRequest.CheckInDate,
             checkOutDate: availabilityRequest.CheckOutDate,
             results: slimAccommodationAvailabilities,
+            expiredAfter: DateTimeOffset.MinValue,
             numberOfProcessedAccommodations: hotelResults.Count);
     }
 
