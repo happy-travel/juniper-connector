@@ -10,11 +10,13 @@ using HappyTravel.BaseConnector.Api.Services.Locations;
 using HappyTravel.ErrorHandling.Extensions;
 using HappyTravel.HttpRequestLogger;
 using HappyTravel.JuniperConnector.Api.Services.Accommodations;
+using HappyTravel.JuniperConnector.Api.Services.Availabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.AccommodationAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.Cancellations;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.RoomContractSetAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.WideAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Bookings;
+using HappyTravel.JuniperConnector.Api.Services.Caching;
 using HappyTravel.JuniperConnector.Api.Services.Locations;
 using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Data;
@@ -50,6 +52,15 @@ public static class ServicesConfigurationExtensions
           .AddTransient<IWideAvailabilitySearchService, WideAvailabilitySearchService>()
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
+
+        builder.Services.AddTransient<WideAvailabilitySearchRequestExecutor>()
+            .AddTransient<AvailabilitySearchMapper>();
+
+        builder.Services.AddTransient<AvailabilityRequestStorage>()
+            .AddTransient<AvailabilitySearchResultStorage>();
+
+        builder.Services.ConfigureApiConnictionSettings(vaultClient)
+            .ConfigureHttpClients(builder.Configuration, vaultClient);
 
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<JuniperContext>();
