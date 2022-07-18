@@ -1,4 +1,5 @@
 ﻿using HappyTravel.JuniperConnector.Common;
+using HappyTravel.JuniperConnector.Common.Infrastructure;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Data.Models;
 using HappyTravel.JuniperConnector.Updater.Infrastructure;
@@ -72,7 +73,7 @@ public class AccommodationUpdater : IUpdateWorker
     {
         var data = _serializer.Deserialize<JP_HotelContent>(hotel.Data);
 
-        var (country, locality) = GetCountryAndLocality(data.Zone.Code, zones);
+        var (country, locality) = ZoneServiceExtensions.GetCountryAndLocality(data.Zone.Code, zones);
 
         var point = GetPoint(data?.Address?.Latitude, data?.Address?.Longitude);
 
@@ -97,29 +98,7 @@ public class AccommodationUpdater : IUpdateWorker
         static Point? GetPoint(string latitudeString, string longitudeString)
             => double.TryParse(latitudeString, out double latitude) && double.TryParse(longitudeString, out double longitude)
                 ? new Point(latitude, longitude)
-                : null;
-
-
-        static (string, string) GetCountryAndLocality(string zoneCode, List<Zone> zones)
-        {
-            Zone zone;
-            var zoneHierarchy = new List<Zone>();
-
-            do
-            {
-                zone = zones.Single(x => x.Code == zoneCode);
-                zoneHierarchy.Add(zone);
-                zoneCode = zone.ParentCode;
-            } while (zone.ParentCode != null);
-
-            var countryZone = zoneHierarchy.FirstOrDefault(x => CountryAreaTypes.Contains(x.AreaType));
-            var country = countryZone is not null ? countryZone.Name : string.Empty;
-
-            var localityZone = zoneHierarchy.FirstOrDefault(x => LocalityAreaTypes.Contains(x.AreaType));
-            var locality = localityZone is not null ? localityZone.Name : string.Empty;
-
-            return (country, locality);
-        }
+                : null;        
     }
 
 
@@ -158,9 +137,7 @@ public class AccommodationUpdater : IUpdateWorker
     }
 
 
-    private const int BatchSize = 1000;
-    private static readonly IReadOnlyCollection<ZoneType> CountryAreaTypes = new ZoneType[] { ZoneType.PAS, ZoneType.COL };
-    private static readonly IReadOnlyCollection<ZoneType> LocalityAreaTypes = new ZoneType[] { ZoneType.CTY, ZoneType.LOC, ZoneType.REG };
+    private const int BatchSize = 1000;    
 
 
     private readonly JuniperContext _context;

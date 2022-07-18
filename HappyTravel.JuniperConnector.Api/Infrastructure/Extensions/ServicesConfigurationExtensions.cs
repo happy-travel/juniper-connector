@@ -17,7 +17,10 @@ using HappyTravel.JuniperConnector.Api.Services.Availabilities.RoomContractSetAv
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.WideAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Bookings;
 using HappyTravel.JuniperConnector.Api.Services.Locations;
+using HappyTravel.JuniperConnector.Common;
+using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
@@ -42,6 +45,9 @@ public static class ServicesConfigurationExtensions
         builder.Services.AddBaseConnectorServices(builder.Configuration, builder.Environment, vaultClient, Connector.Name);
 
         builder.Services.AddTransient<HttpRequestLoggingHandler>();
+        builder.Services.AddTransient<MultilingualAccommodationMapper>();
+        builder.Services.AddTransient<JuniperSerializer>();
+        builder.Services.AddTransient<JuniperContext>();
 
         builder.Services.AddTransient<IAccommodationService, AccommodationService>()
           .AddTransient<IAccommodationAvailabilityService, AccommodationAvailabilityService>()
@@ -89,5 +95,31 @@ public static class ServicesConfigurationExtensions
         });
 
         builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+        ConfigureDatabaseOptions(builder.Services, vaultClient, builder);
+    }
+
+
+    private static void ConfigureDatabaseOptions(IServiceCollection services, VaultClient.VaultClient vaultClient, WebApplicationBuilder builder)
+    {
+        var databaseOptions = vaultClient.Get(builder.Configuration["Database:Options"]).GetAwaiter().GetResult();
+
+        services.AddDbContext<JuniperContext>(options =>
+        {
+            var host = databaseOptions["host"];
+            var port = databaseOptions["port"];
+            var password = databaseOptions["password"];
+            var userId = databaseOptions["userId"];
+
+            var connectionString = builder.Configuration["Database:ConnectionString"];
+            options.UseNpgsql(string.Format(connectionString, host, port, userId, password), builder =>
+            {
+                builder.UseNetTopologySuite();
+                builder.EnableRetryOnFailure();
+            });
+            options.UseInternalServiceProvider(null);
+            options.EnableSensitiveDataLogging(false);
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }, ServiceLifetime.Singleton, ServiceLifetime.Singleton);
     }
 }
