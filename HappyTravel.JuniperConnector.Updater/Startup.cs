@@ -5,6 +5,7 @@ using HappyTravel.JuniperConnector.Common.Settings;
 using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Updater.Infrastructure;
 using HappyTravel.JuniperConnector.Updater.Service;
+using HappyTravel.JuniperConnector.Updater.Settings;
 using HappyTravel.JuniperConnector.Updater.Workers;
 using HappyTravel.VaultClient;
 using Microsoft.AspNetCore.Builder;
@@ -49,11 +50,11 @@ public class Startup
         services.AddTransient<JuniperSerializer>();
         services.AddTransient<JuniperContext>();
         services.AddTransient<ZoneLoader>();
-        services.AddTransient<HotelsUpdater>();
+        services.AddTransient<HotelUpdater>();
         services.AddTransient<HotelLoader>();
-        services.AddTransient<UpdateHistoryService>();
+        services.AddTransient<AccommodationUpdater>();
 
-        services.AddTransient<IJuniperServiceClient, JuniperServiceClient>();
+        services.AddTransient<JuniperContentClientService>();
 
         services.AddHostedService<StaticDataUpdateHostedService>();
         services.AddTransient<DateTimeProvider>();
@@ -66,10 +67,11 @@ public class Startup
         services.Configure<ApiConnectionSettings>(options =>
         {
             options.StaticDataEndPoint = apiConnectionOptions["staticDataEndPoint"];
-            options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
             options.Email = apiConnectionOptions["email"];
             options.Password = apiConnectionOptions["password"];
         });
+
+        services.Configure<AccommodationDataUpdateOptions>(Configuration.GetSection("Workers:AccommodationUpdateOptions"));
     }
 
 
@@ -80,6 +82,7 @@ public class Startup
         {
             services.AddTransient<IUpdateWorker, ZoneLoader>();
             services.AddTransient<IUpdateWorker, HotelLoader>();
+            services.AddTransient<IUpdateWorker, AccommodationUpdater>();
         }
         else
         {
@@ -89,6 +92,8 @@ public class Startup
                     services.AddTransient<IUpdateWorker, ZoneLoader>();
                 if (workerName == nameof(HotelLoader))
                     services.AddTransient<IUpdateWorker, HotelLoader>();
+                if (workerName == nameof(AccommodationUpdater))
+                    services.AddTransient<IUpdateWorker, AccommodationUpdater>();
             }
         }
     }

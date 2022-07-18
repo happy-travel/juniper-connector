@@ -4,6 +4,7 @@ using HappyTravel.JuniperConnector.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -17,10 +18,38 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Accommodation", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<Point>("Coordinates")
+                        .IsRequired()
+                        .HasColumnType("geometry");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Locality")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Modified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("Accommodations");
+                });
 
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Hotel", b =>
                 {
@@ -44,45 +73,22 @@ namespace HappyTravel.JuniperConnector.Data.Migrations
                     b.ToTable("Hotels");
                 });
 
-            modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.StaticDataUpdateHistoryEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("FinishTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Options")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StaticDataUpdateHistory");
-                });
-
             modelBuilder.Entity("HappyTravel.JuniperConnector.Data.Models.Zone", b =>
                 {
                     b.Property<string>("Code")
                         .HasColumnType("text");
+
+                    b.Property<int>("AreaType")
+                        .HasColumnType("integer");
 
                     b.Property<string>("IATA")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParentCode")
                         .HasColumnType("text");
 
                     b.HasKey("Code");

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HappyTravel.JuniperConnector.Updater": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Local"
+      }
+    }
+  }
+}

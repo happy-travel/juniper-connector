@@ -1,0 +1,47 @@
+{{- $chart_name := .Chart.Name }}
+{{- $chart_version := .Chart.Version | replace "+" "_" }}
+
+{{- range $cron := .Values.cronjob.crons }}
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{ $chart_name }}-{{ $cron.name }}"
+  labels:
+    chart: "{{ $chart_name }}-{{ $chart_version }}"
+spec:
+  schedule: {{ $cron.schedule }}
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  suspend: {{ $cron.suspend }}
+  concurrencyPolicy: {{ $.Values.concurrencyPolicy }} 
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ $chart_name }} 
+        spec:
+          containers:
+          - name: "{{ $chart_name }}-{{ $cron.name }}"
+            image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+            imagePullPolicy: {{ $.Values.image.pullPolicy }} 
+            resources:
+              limits:
+                cpu: {{ $.Values.resources.limits.cpu }}
+                memory: {{ $.Values.resources.limits.memory }}
+              requests:
+                cpu: {{ $.Values.resources.requests.cpu }}
+                memory: {{ $.Values.resources.requests.memory }}
+            {{- with $cron.env }}
+            env:
+{{ toYaml . | indent 12 }}
+            {{- end }}
+            envFrom:
+              - configMapRef:
+                  name: {{ $chart_name }}-env
+          restartPolicy: {{ $.Values.image.restartPolicy }}
+          securityContext: {}
+          imagePullSecrets:
+            - name: {{ $.Values.image.imagePullSecrets }}
+{{- end }}
