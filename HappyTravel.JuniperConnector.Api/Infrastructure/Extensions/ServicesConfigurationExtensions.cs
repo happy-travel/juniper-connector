@@ -39,9 +39,6 @@ public static class ServicesConfigurationExtensions
         builder.Services.AddBaseConnectorServices(builder.Configuration, builder.Environment, vaultClient, Connector.Name);
 
         builder.Services.AddTransient<HttpRequestLoggingHandler>();
-        builder.Services.AddTransient<MultilingualAccommodationMapper>();
-        builder.Services.AddTransient<JuniperSerializer>();
-        builder.Services.AddTransient<JuniperContext>();
 
         builder.Services.AddTransient<IAccommodationService, AccommodationService>()
           .AddTransient<IAccommodationAvailabilityService, AccommodationAvailabilityService>()
@@ -50,6 +47,10 @@ public static class ServicesConfigurationExtensions
           .AddTransient<IWideAvailabilitySearchService, WideAvailabilitySearchService>()
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
+
+        builder.Services.AddTransient<MultilingualAccommodationMapper>();
+        builder.Services.AddTransient<LocationMapper>();
+        builder.Services.AddTransient<JuniperSerializer>();
 
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<JuniperContext>();
