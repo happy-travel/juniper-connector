@@ -8,12 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HappyTravel.BaseConnector.Api" Version="1.7.0" />
-    <PackageReference Include="HappyTravel.ErrorHandling" Version="1.2.3" />
+    <PackageReference Include="HappyTravel.BaseConnector.Api" Version="1.8.2" />
     <PackageReference Include="HappyTravel.HttpRequestLogger" Version="1.0.5" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.17.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.3.1" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.19.0" />
   </ItemGroup>
 
   <ItemGroup>
