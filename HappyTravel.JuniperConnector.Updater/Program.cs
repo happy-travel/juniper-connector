@@ -21,8 +21,8 @@ public class Program
             {
                 var environment = hostingContext.HostingEnvironment;
 
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true,
+                config.AddJsonFile("updaterSettings.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"updaterSettings.{environment.EnvironmentName}.json", optional: true,
                         reloadOnChange: true);
 
                 var consulHttpAddr = Environment.GetEnvironmentVariable("CONSUL_HTTP_ADDR") ?? throw new InvalidOperationException("Consul endpoint is not set");
