@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace HappyTravel.JuniperConnector.Updater.Service;
@@ -96,9 +97,15 @@ public class AccommodationUpdater : IUpdateWorker
 
 
         static Point? GetPoint(string latitudeString, string longitudeString)
-            => double.TryParse(latitudeString, out double latitude) && double.TryParse(longitudeString, out double longitude)
+        {
+            return GetDouble(latitudeString, out double latitude) && GetDouble(longitudeString, out double longitude)
                 ? new Point(latitude, longitude)
-                : null;        
+                : null;
+
+
+            bool GetDouble(string str, out double result)
+                => double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
+        }
     }
 
 
