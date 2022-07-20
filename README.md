@@ -1,4 +1,4 @@
-# juniper-connector.
+# juniper-connector
 ## Summary
 The project contains an API implementation and static data server for Juniper API
 
