@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+
+ARG VAULT_TOKEN
+ARG CONSUL_HTTP_TOKEN
+ENV HTDC_VAULT_TOKEN=$VAULT_TOKEN
+ENV CONSUL_HTTP_TOKEN=$CONSUL_HTTP_TOKEN
+
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
+ARG GITHUB_TOKEN
+
+WORKDIR /src/app
+
+COPY . .
+
+RUN dotnet restore HappyTravel.JuniperConnector.Updater
+
+RUN dotnet build -c Release HappyTravel.JuniperConnector.Updater
+
+FROM build AS publish
+
+RUN dotnet publish -c Release -o /app/release HappyTravel.JuniperConnector.Updater
+
+FROM base AS final
+
+WORKDIR /app
+COPY --from=publish /app/release .
+
+ENTRYPOINT ["dotnet", "HappyTravel.JuniperConnector.Updater.dll"]

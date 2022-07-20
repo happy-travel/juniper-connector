@@ -6,15 +6,54 @@ using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Prometheus;
 using System.Net;
+using System.Reflection;
 
-namespace HappyTravel.JuniperConnector.Api.Infrastructure;
+namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection ConfigureDatabaseOptions(this IServiceCollection services,
-        IConfiguration configuration, IVaultClient vaultClient)
+    public static IServiceCollection ConfigureSwagger(this IServiceCollection services)    
+        => services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1.0", new OpenApiInfo { Title = "HappyTravel.com Juniper API", Version = "v1.0" });
+
+            var xmlCommentsFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlCommentsFilePath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFileName);
+
+            options.IncludeXmlComments(xmlCommentsFilePath);
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        })
+        .AddSwaggerGenNewtonsoftSupport();
+
+
+    public static IServiceCollection ConfigureDatabaseOptions(this IServiceCollection services, IVaultClient vaultClient, IConfiguration configuration)
     {
         var databaseOptions = vaultClient.Get(configuration["Database:Options"]).GetAwaiter().GetResult();
 
@@ -43,11 +82,11 @@ public static class ServiceCollectionExtensions
         var apiConnectionOptions = vaultClient.Get("juniper-connector/api-connection").GetAwaiter().GetResult();
 
         return services.Configure<ApiConnectionSettings>(options =>
-            {
-                options.AvailEndPoint = apiConnectionOptions["availEndPoint"];
-                options.Email = apiConnectionOptions["email"];
-                options.Password = apiConnectionOptions["password"];
-            });
+        {
+            options.AvailTransactionsEndPoint = apiConnectionOptions["availTransactionsEndPoint"];
+            options.Email = apiConnectionOptions["email"];
+            options.Password = apiConnectionOptions["password"];
+        });
     }
 
 
@@ -55,7 +94,7 @@ public static class ServiceCollectionExtensions
     {
         var fukuokaOptions = vaultClient.Get(configuration["Fukuoka:Options"]).GetAwaiter().GetResult();
 
-        services.AddTransient<JuniperClient>()       
+        services.AddTransient<JuniperAvailTransactionsClient>()
             .AddHttpClient(Common.Constants.HttpAvailClientName, client =>
             {
                 client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip, deflate");

@@ -20,23 +20,41 @@ public static partial class LoggerExtensions
     [LoggerMessage(40005, LogLevel.Information, "Stopping operation '{operationName}'")]
     static partial void StoppingOperation(ILogger logger, string operationName);
     
-    [LoggerMessage(40006, LogLevel.Information, "Starting raw data zone update")]
+    [LoggerMessage(40010, LogLevel.Information, "Starting raw data zone update")]
     static partial void StartingZonesUpdate(ILogger logger);
     
-    [LoggerMessage(40007, LogLevel.Critical, "Zone loader: ")]
-    static partial void ZoneLoaderException(ILogger logger, System.Exception exception);
+    [LoggerMessage(40011, LogLevel.Information, "Finish raw data zone update")]
+    static partial void FinishZonesUpdate(ILogger logger);
     
-    [LoggerMessage(40008, LogLevel.Information, "Starting raw data hotels update with id '{updateId}'")]
-    static partial void StartingHotelsUpdate(ILogger logger, int updateId);
+    [LoggerMessage(40012, LogLevel.Error, "ZoneList request failed")]
+    static partial void ZoneListRequestFailed(ILogger logger, System.Exception exception);
     
-    [LoggerMessage(40009, LogLevel.Information, "Deactivate all hotels")]
-    static partial void DeactivateAllHotels(ILogger logger);
+    [LoggerMessage(40020, LogLevel.Information, "Starting raw data hotels update")]
+    static partial void StartingHotelsUpdate(ILogger logger);
     
-    [LoggerMessage(40010, LogLevel.Critical, "Hotels loader: ")]
-    static partial void HotelLoaderException(ILogger logger, System.Exception exception);
+    [LoggerMessage(40021, LogLevel.Information, "Finish raw data update")]
+    static partial void FinishHotelsUpdate(ILogger logger);
     
-    [LoggerMessage(40011, LogLevel.Information, "Finish raw data update with id '{updateId}'")]
-    static partial void FinishHotelsUpdate(ILogger logger, int updateId);
+    [LoggerMessage(40022, LogLevel.Error, "HotelPortfolio request failed")]
+    static partial void HotelPortfolioRequestFailed(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40023, LogLevel.Error, "HotelContent request failed")]
+    static partial void HotelContentRequestFailed(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40024, LogLevel.Information, "Deactivated {count} hotels")]
+    static partial void DeactivatingCompleted(ILogger logger, int count);
+    
+    [LoggerMessage(40025, LogLevel.Information, "Starting accommodation updater")]
+    static partial void StartingAccommodationUpdater(ILogger logger);
+    
+    [LoggerMessage(40026, LogLevel.Critical, "Accommodation updater: ")]
+    static partial void AccommodationUpdaterException(ILogger logger, System.Exception exception);
+    
+    [LoggerMessage(40027, LogLevel.Information, "Get hotels from DB. From {i} to {batchSizeInc}")]
+    static partial void AccommodationUpdaterGetHotels(ILogger logger, int i, int batchSizeInc);
+    
+    [LoggerMessage(40028, LogLevel.Information, "Point parse failed: {latitude}, {longitude}")]
+    static partial void PointParseFailed(ILogger logger, string latitude, string longitude);
     
     
     
@@ -58,18 +76,36 @@ public static partial class LoggerExtensions
     public static void LogStartingZonesUpdate(this ILogger logger)
         => StartingZonesUpdate(logger);
     
-    public static void LogZoneLoaderException(this ILogger logger, System.Exception exception)
-        => ZoneLoaderException(logger, exception);
+    public static void LogFinishZonesUpdate(this ILogger logger)
+        => FinishZonesUpdate(logger);
     
-    public static void LogStartingHotelsUpdate(this ILogger logger, int updateId)
-        => StartingHotelsUpdate(logger, updateId);
+    public static void LogZoneListRequestFailed(this ILogger logger, System.Exception exception)
+        => ZoneListRequestFailed(logger, exception);
     
-    public static void LogDeactivateAllHotels(this ILogger logger)
-        => DeactivateAllHotels(logger);
+    public static void LogStartingHotelsUpdate(this ILogger logger)
+        => StartingHotelsUpdate(logger);
     
-    public static void LogHotelLoaderException(this ILogger logger, System.Exception exception)
-        => HotelLoaderException(logger, exception);
+    public static void LogFinishHotelsUpdate(this ILogger logger)
+        => FinishHotelsUpdate(logger);
     
-    public static void LogFinishHotelsUpdate(this ILogger logger, int updateId)
-        => FinishHotelsUpdate(logger, updateId);
+    public static void LogHotelPortfolioRequestFailed(this ILogger logger, System.Exception exception)
+        => HotelPortfolioRequestFailed(logger, exception);
+    
+    public static void LogHotelContentRequestFailed(this ILogger logger, System.Exception exception)
+        => HotelContentRequestFailed(logger, exception);
+    
+    public static void LogDeactivatingCompleted(this ILogger logger, int count)
+        => DeactivatingCompleted(logger, count);
+    
+    public static void LogStartingAccommodationUpdater(this ILogger logger)
+        => StartingAccommodationUpdater(logger);
+    
+    public static void LogAccommodationUpdaterException(this ILogger logger, System.Exception exception)
+        => AccommodationUpdaterException(logger, exception);
+    
+    public static void LogAccommodationUpdaterGetHotels(this ILogger logger, int i, int batchSizeInc)
+        => AccommodationUpdaterGetHotels(logger, i, batchSizeInc);
+    
+    public static void LogPointParseFailed(this ILogger logger, string latitude, string longitude)
+        => PointParseFailed(logger, latitude, longitude);
 }

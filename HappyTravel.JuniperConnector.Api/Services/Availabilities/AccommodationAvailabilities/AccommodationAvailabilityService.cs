@@ -1,9 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
+using HappyTravel.BaseConnector.Api.Infrastructure;
 using HappyTravel.BaseConnector.Api.Services.Availabilities.AccommodationAvailabilities;
 using HappyTravel.EdoContracts.Accommodations;
+using HappyTravel.EdoContracts.Accommodations.Enums;
 using HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 using HappyTravel.JuniperConnector.Api.Models.Availability;
 using HappyTravel.JuniperConnector.Api.Services.Caching;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HappyTravel.JuniperConnector.Api.Services.Availabilities.AccommodationAvailabilities;
 
@@ -17,25 +20,31 @@ public class AccommodationAvailabilityService : IAccommodationAvailabilityServic
     }
 
 
-    public async Task<Result<AccommodationAvailability>> Get(string availabilityId, string accommodationId, CancellationToken cancellationToken)
+    public async Task<Result<AccommodationAvailability, ProblemDetails>> Get(string availabilityId, string accommodationId, CancellationToken cancellationToken)
     {
         return await GetRequest()
             .Bind(GetCachedAccommodationAvailability)
             .Map(MapToContracts);
 
 
-        Task<Result<AvailabilityRequest>> GetRequest()
-            => _requestStorage.Get(availabilityId);
+        async Task<Result<AvailabilityRequest, ProblemDetails>> GetRequest()
+        {
+            var (_, isFailure, request, error) = await _requestStorage.Get(availabilityId);
+            if (isFailure)
+                return ProblemDetailsBuilder.CreateFailureResult<AvailabilityRequest>(error, SearchFailureCodes.Unknown);
+
+            return request;
+        }        
 
 
-        async Task<Result<(AvailabilityRequest, CachedAccommodationAvailability)>> GetCachedAccommodationAvailability(AvailabilityRequest request)
+        async Task<Result<(AvailabilityRequest, CachedAccommodationAvailability), ProblemDetails>> GetCachedAccommodationAvailability(AvailabilityRequest request)
         {
             var (isSuccess, _, accommodationAvailability, error) = await _availabilitySearchResultStorage.GetByAccommodationId(availabilityId, accommodationId);
 
             if (isSuccess)
                 return (request, accommodationAvailability);
 
-            return Result.Failure<(AvailabilityRequest, CachedAccommodationAvailability)>(error);
+            return ProblemDetailsBuilder.CreateFailureResult<(AvailabilityRequest, CachedAccommodationAvailability)>(error, SearchFailureCodes.AvailabilityNotFound);
         }
 
 

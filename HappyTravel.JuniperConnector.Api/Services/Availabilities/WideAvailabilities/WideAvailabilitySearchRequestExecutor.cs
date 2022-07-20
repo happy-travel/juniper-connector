@@ -8,7 +8,7 @@ namespace HappyTravel.JuniperConnector.Api.Services.Availabilities.WideAvailabil
 
 public class WideAvailabilitySearchRequestExecutor
 {
-    public WideAvailabilitySearchRequestExecutor(JuniperClient juniperClient)
+    public WideAvailabilitySearchRequestExecutor(JuniperAvailTransactionsClient juniperClient)
     {
         _juniperClient = juniperClient;
     }
@@ -69,5 +69,5 @@ public class WideAvailabilitySearchRequestExecutor
 
     private const int MaxAllowedHotelCodes = 500; // Due to limits: "max 2000 hotels per search"
 
-    JuniperClient _juniperClient;
+    JuniperAvailTransactionsClient _juniperClient;
 }

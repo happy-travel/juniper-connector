@@ -27,13 +27,15 @@ public class WideAvailabilitySearchService : IWideAvailabilitySearchService
 
     public async Task<Result<Availability>> Get(AvailabilityRequest request, string languageCode, CancellationToken cancellationToken)
     {
-        //var accommodations = await GetAccommodations();
-        var accommodations = new Dictionary<string, Accommodation>() { { "JP046300", new Accommodation() } };
+        var accommodations = await GetAccommodations();
 
         if (!accommodations.Any())
-            return new Availability(string.Empty, request.GetNumberOfNights(),
-                request.CheckInDate, request.CheckOutDate,
-                new List<SlimAccommodationAvailability>(0));
+            return new Availability(availabilityId: string.Empty,
+                numberOfNights: request.GetNumberOfNights(),
+                checkInDate: request.CheckInDate,
+                checkOutDate: request.CheckOutDate,
+                expiredAfter: DateTimeOffset.MinValue,
+                results: new List<SlimAccommodationAvailability>(0));
 
         return await GetHotelResults()
             .Map(ToContracts)
