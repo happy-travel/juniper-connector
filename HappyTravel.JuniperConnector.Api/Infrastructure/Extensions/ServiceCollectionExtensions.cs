@@ -66,6 +66,6 @@ public static class ServiceCollectionExtensions
             options.UseInternalServiceProvider(null);
             options.EnableSensitiveDataLogging(false);
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        }, ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+        }, ServiceLifetime.Transient, ServiceLifetime.Transient);
     }
 }
