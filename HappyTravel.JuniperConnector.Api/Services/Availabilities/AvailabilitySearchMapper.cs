@@ -59,10 +59,6 @@ public class AvailabilitySearchMapper
     {
         var cachedRoomContractSets = new List<CachedRoomContractSet>();
 
-        // The number of rooms in each hotelOption must match the number of rooms in the request.
-        if (hotel.HotelOptions.Any(o => o.HotelRooms.Count() < availabilityRequest.Rooms.Count))
-            return cachedRoomContractSets;
-
         foreach (var hotelOption in hotel.HotelOptions)
         {
             var id = Guid.NewGuid();                
@@ -74,6 +70,7 @@ public class AvailabilitySearchMapper
             var deadline = hotelOption.NonRefundableSpecified && hotelOption.NonRefundable
                 ? new Deadline(DateTimeOffset.UtcNow, new List<CancellationPolicy> { new(DateTimeOffset.UtcNow, 100) })
                 : DeadlineMapper.GetDeadline(hotelOption.CancellationPolicy, availabilityRequest.CheckInDate, totalGrossPrice, numberOfNights);
+            var roomCombination = GetRoomCombination(hotelOption.HotelRooms);
             var roomsCount = hotelOption.HotelRooms.Count();
             var (roomGrossPrice, roomNetPrice, lastRoomGrossPrice, lastRoomNetPrice) = GetRoomPrices(Convert.ToDecimal(totalGrossPrice), Convert.ToDecimal(totalNetPrice), roomsCount, currency);
 
@@ -82,7 +79,7 @@ public class AvailabilitySearchMapper
                 Rate: new Rate(new MoneyAmount((decimal)totalNetPrice, currency),
                     new MoneyAmount((decimal)totalGrossPrice, currency)),
                 Deadline: deadline,
-                Rooms: hotelOption.HotelRooms
+                Rooms: roomCombination
                     .Select((r, i) => CreateRoomContract(
                         room: r,
                         board: hotelOption.Board,
@@ -114,7 +111,14 @@ public class AvailabilitySearchMapper
                 roomNetPrice,
                 MoneyRounder.Ceil((totalGrossPrice - (roomGrossPrice.Amount * (roomsCount - 1))).ToMoneyAmount(currency)),
                 MoneyRounder.Ceil((totalNetPrice - (roomNetPrice.Amount * (roomsCount - 1))).ToMoneyAmount(currency)));
-        }            
+        }
+
+
+        List<JP_HotelRoom> GetRoomCombination(JP_HotelRoom[] apiRooms)
+            => availabilityRequest.Rooms
+                .Select((r, i) => apiRooms
+                    .Single(apiRoom => apiRoom.Source.Split(',').Contains((i + 1).ToString()))) // "i + 1" because "Source" is the Room identifier. Starts from "1"
+                .ToList();
     }
 
 
