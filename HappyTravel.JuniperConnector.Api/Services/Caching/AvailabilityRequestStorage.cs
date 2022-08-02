@@ -15,6 +15,11 @@ public class AvailabilityRequestStorage
     }
 
 
+    /// <summary>
+    /// Retrieving availability request from cache
+    /// </summary>
+    /// <param name="availabilityId">Availability id</param>
+    /// <returns></returns>
     public async Task<Result<AvailabilityRequest>> Get(string availabilityId)
     {
         var availabilityRequest = await _flow.GetAsync<AvailabilityRequest?>(BuildKey(availabilityId), RequestCacheLifeTime);
@@ -27,6 +32,12 @@ public class AvailabilityRequestStorage
     }
 
 
+    /// <summary>
+    /// Save availability request to cache
+    /// </summary>
+    /// <param name="availabilityId">Availability id</param>
+    /// <param name="request">Availability request</param>
+    /// <returns></returns>
     public Task Set(string availabilityId, AvailabilityRequest request)
         => _flow.SetAsync(BuildKey(availabilityId), request, RequestCacheLifeTime);
 
