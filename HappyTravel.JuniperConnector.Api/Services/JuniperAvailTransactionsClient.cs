@@ -16,8 +16,13 @@ public class JuniperAvailTransactionsClient : JuniperServiceClient
         _availTransactionsClient = CreateAvailTransactionsClient();
         _logger = logger;
     }
-   
 
+
+    /// <summary>
+    /// Sending an availability request to the supplier's API
+    /// </summary>
+    /// <param name="request">Availability request</param>
+    /// <returns></returns>
     public async Task<Result<JP_Results>> GetHotelAvailability(JP_HotelAvail request)
     {
         request.SetDefaultProperty(_login);

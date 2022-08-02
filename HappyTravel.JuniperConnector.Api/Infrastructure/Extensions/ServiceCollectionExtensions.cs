@@ -15,6 +15,11 @@ namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Swagger setup
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureSwagger(this IServiceCollection services)    
         => services.AddSwaggerGen(options =>
         {
@@ -52,7 +57,13 @@ public static class ServiceCollectionExtensions
         })
         .AddSwaggerGenNewtonsoftSupport();
 
-
+    /// <summary>
+    /// Setting up a database connection
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <param name="configuration">Represents a set of key/value application configuration properties</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureDatabaseOptions(this IServiceCollection services, IVaultClient vaultClient, IConfiguration configuration)
     {
         var databaseOptions = vaultClient.Get(configuration["Database:Options"]).GetAwaiter().GetResult();
@@ -77,6 +88,12 @@ public static class ServiceCollectionExtensions
     }
 
 
+    /// <summary>
+    /// Set up the credentials required to connect to the supplier's API
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureApiConnictionSettings(this IServiceCollection services, IVaultClient vaultClient)
     {
         var apiConnectionOptions = vaultClient.Get("juniper-connector/api-connection").GetAwaiter().GetResult();
@@ -90,6 +107,13 @@ public static class ServiceCollectionExtensions
     }
 
 
+    /// <summary>
+    /// Adding an http client to connect to the supplier's API
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="configuration">Represents a set of key/value application configuration properties</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureHttpClients(this IServiceCollection services, IConfiguration configuration, IVaultClient vaultClient)
     {
         var fukuokaOptions = vaultClient.Get(configuration["Fukuoka:Options"]).GetAwaiter().GetResult();

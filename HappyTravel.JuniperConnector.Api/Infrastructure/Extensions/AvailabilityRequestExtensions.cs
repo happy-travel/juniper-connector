@@ -10,6 +10,12 @@ public static class AvailabilityRequestExtensions
        => request.CheckOutDate.Date.Subtract(request.CheckInDate.Date).Days;
 
 
+    /// <summary>
+    /// Converts a AvailabilityRequest object to a JP_HotelAvail object
+    /// </summary>
+    /// <param name="request">Convertible object</param>
+    /// <param name="accommodationIds">List of supplier accommodation ids to search</param>
+    /// <returns></returns>
     public static JP_HotelAvail ToJuniperAvailabilityRequest(this AvailabilityRequest request, List<string> accommodationIds)
     {
         var (basePaxes, roomPaxes) = GetPaxes();
