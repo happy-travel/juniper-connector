@@ -20,6 +20,13 @@ public class AccommodationAvailabilityService : IAccommodationAvailabilityServic
     }
 
 
+    /// <summary>
+    /// Searches for specific accommodation with available room contract sets. The 2nd search step. 
+    /// </summary>
+    /// <param name="accommodationId">Supplier accommodation id</param>
+    /// <param name="availabilityId">Availability Id</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
     public async Task<Result<AccommodationAvailability, ProblemDetails>> Get(string availabilityId, string accommodationId, CancellationToken cancellationToken)
     {
         return await GetRequest()
