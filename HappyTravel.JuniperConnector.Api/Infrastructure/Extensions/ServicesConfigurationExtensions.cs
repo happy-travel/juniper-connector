@@ -10,11 +10,13 @@ using HappyTravel.BaseConnector.Api.Services.Locations;
 using HappyTravel.ErrorHandling.Extensions;
 using HappyTravel.HttpRequestLogger;
 using HappyTravel.JuniperConnector.Api.Services.Accommodations;
+using HappyTravel.JuniperConnector.Api.Services.Availabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.AccommodationAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.Cancellations;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.RoomContractSetAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Availabilities.WideAvailabilities;
 using HappyTravel.JuniperConnector.Api.Services.Bookings;
+using HappyTravel.JuniperConnector.Api.Services.Caching;
 using HappyTravel.JuniperConnector.Api.Services.Locations;
 using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Data;
@@ -24,6 +26,11 @@ namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class ServicesConfigurationExtensions
 {
+    /// <summary>
+    /// Application configuration
+    /// </summary>
+    /// <param name="builder">A builder for web applications and services</param>
+    /// <exception cref="Exception"></exception>
     public static void ConfigureServices(this WebApplicationBuilder builder)
     {
         using var vaultClient = new VaultClient.VaultClient(new VaultOptions
@@ -47,6 +54,15 @@ public static class ServicesConfigurationExtensions
           .AddTransient<IWideAvailabilitySearchService, WideAvailabilitySearchService>()
           .AddTransient<IBookingService, BookingService>()
           .AddTransient<ILocationService, LocationService>();
+
+        builder.Services.AddTransient<WideAvailabilitySearchRequestExecutor>()
+            .AddTransient<AvailabilitySearchMapper>();
+
+        builder.Services.AddTransient<AvailabilityRequestStorage>()
+            .AddTransient<AvailabilitySearchResultStorage>();
+
+        builder.Services.ConfigureApiConnictionSettings(vaultClient)
+            .ConfigureHttpClients(builder.Configuration, vaultClient);
 
         builder.Services.AddTransient<MultilingualAccommodationMapper>();
         builder.Services.AddTransient<LocationMapper>();

@@ -1,13 +1,25 @@
-﻿using HappyTravel.JuniperConnector.Data;
+﻿using HappyTravel.HttpRequestAuditLogger.Extensions;
+using HappyTravel.HttpRequestLogger;
+using HappyTravel.JuniperConnector.Api.Services;
+using HappyTravel.JuniperConnector.Common.Settings;
+using HappyTravel.JuniperConnector.Data;
 using HappyTravel.VaultClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Prometheus;
+using System.Net;
 using System.Reflection;
 
 namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Swagger setup
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureSwagger(this IServiceCollection services)    
         => services.AddSwaggerGen(options =>
         {
@@ -45,7 +57,13 @@ public static class ServiceCollectionExtensions
         })
         .AddSwaggerGenNewtonsoftSupport();
 
-
+    /// <summary>
+    /// Setting up a database connection
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <param name="configuration">Represents a set of key/value application configuration properties</param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureDatabaseOptions(this IServiceCollection services, IVaultClient vaultClient, IConfiguration configuration)
     {
         var databaseOptions = vaultClient.Get(configuration["Database:Options"]).GetAwaiter().GetResult();
@@ -67,5 +85,60 @@ public static class ServiceCollectionExtensions
             options.EnableSensitiveDataLogging(false);
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+    }
+
+
+    /// <summary>
+    /// Set up the credentials required to connect to the supplier's API
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureApiConnictionSettings(this IServiceCollection services, IVaultClient vaultClient)
+    {
+        var apiConnectionOptions = vaultClient.Get("juniper-connector/api-connection").GetAwaiter().GetResult();
+
+        return services.Configure<ApiConnectionSettings>(options =>
+        {
+            options.AvailTransactionsEndPoint = apiConnectionOptions["availTransactionsEndPoint"];
+            options.Email = apiConnectionOptions["email"];
+            options.Password = apiConnectionOptions["password"];
+        });
+    }
+
+
+    /// <summary>
+    /// Adding an http client to connect to the supplier's API
+    /// </summary>
+    /// <param name="services">The Microsoft.Extensions.DependencyInjection.IServiceCollection</param>
+    /// <param name="configuration">Represents a set of key/value application configuration properties</param>
+    /// <param name="vaultClient">Vault client</param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureHttpClients(this IServiceCollection services, IConfiguration configuration, IVaultClient vaultClient)
+    {
+        var fukuokaOptions = vaultClient.Get(configuration["Fukuoka:Options"]).GetAwaiter().GetResult();
+
+        services.AddTransient<JuniperAvailTransactionsClient>()
+            .AddHttpClient(Common.Constants.HttpAvailClientName, client =>
+            {
+                client.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, "gzip, deflate");
+            })
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            })
+            .AddHttpClientRequestLogging(configuration: configuration)
+            .UseHttpClientMetrics()
+            .AddHttpRequestAudit(options =>
+            {
+                options.Endpoint = fukuokaOptions["endpoint"];
+                options.LoggingCondition = request =>
+                {
+                    var url = request.Headers.GetValues("SOAPAction").FirstOrDefault();
+                    return !string.IsNullOrEmpty(url) && (url.Contains("/HotelAvail"));
+                };
+            });
+
+        return services;
     }
 }

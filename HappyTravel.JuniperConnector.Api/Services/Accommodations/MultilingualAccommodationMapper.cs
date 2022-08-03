@@ -45,7 +45,7 @@ public class MultilingualAccommodationMapper
     {
         var multilingualName = new MultiLanguage<string>();
 
-        multilingualName.TrySetValue(Constants.DefaultLanguageCode, hotelDetails.HotelName);
+        multilingualName.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails.HotelName);
 
         return multilingualName;
     }
@@ -56,7 +56,7 @@ public class MultilingualAccommodationMapper
         var multilingualAdditionalInfo = new MultiLanguage<Dictionary<string, string>>();
 
         if (hotelDetails.Features is not null)
-            multilingualAdditionalInfo.TrySetValue(Constants.DefaultLanguageCode,
+            multilingualAdditionalInfo.TrySetValue(Common.Constants.DefaultLanguageCode,
                 new Dictionary<string, string> { { "Features", string.Join(";", hotelDetails.Features.Select(x => x.Value1)) } });
 
         return multilingualAdditionalInfo;
@@ -64,12 +64,12 @@ public class MultilingualAccommodationMapper
 
 
     private MultiLanguage<string> GetMultilingualCategory(JP_HotelContent hotelDetails)
-    {        
+    {
         var multilingualCategory = new MultiLanguage<string>();
 
         var hotelCategory = hotelDetails.HotelCategory?.Value;
         if (hotelCategory is not null)
-            multilingualCategory.TrySetValue(Constants.DefaultLanguageCode, hotelCategory);
+            multilingualCategory.TrySetValue(Common.Constants.DefaultLanguageCode, hotelCategory);
 
         return multilingualCategory;
     }
@@ -112,24 +112,24 @@ public class MultilingualAccommodationMapper
         var (country, locality) = ZoneServiceExtensions.GetCountryAndLocality(hotelDetails.Zone.Code, zones);
         var multilingualLocalityName = new MultiLanguage<string>();
 
-        multilingualLocalityName.TrySetValue(Constants.DefaultLanguageCode, locality);
+        multilingualLocalityName.TrySetValue(Common.Constants.DefaultLanguageCode, locality);
 
         var multilingualAddress = new MultiLanguage<string>();
         var address = hotelDetails.Address?.Address;
         if (address is not null)
-            multilingualAddress.TrySetValue(Constants.DefaultLanguageCode, hotelDetails.Address.Address);
+            multilingualAddress.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails.Address.Address);
 
         var multilingualCountry = new MultiLanguage<string>();
 
-        multilingualCountry.TrySetValue(Constants.DefaultLanguageCode, country);
+        multilingualCountry.TrySetValue(Common.Constants.DefaultLanguageCode, country);
 
-        var multilingualCountryCode = Constants.VisibleCultures.FirstOrDefault(x => x.Value == country).Key;        
+        var multilingualCountryCode = Common.Constants.VisibleCultures.FirstOrDefault(x => x.Value == country).Key;        
 
         var coordinates = GetPoint(hotelDetails.Address?.Latitude, hotelDetails.Address?.Longitude);
 
         var multilingualZone = new MultiLanguage<string>();
 
-        multilingualZone.TrySetValue(Constants.DefaultLanguageCode, hotelDetails.Zone.Name);
+        multilingualZone.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails.Zone.Name);
 
         return new MultilingualLocationInfo(
             countryCode: multilingualCountryCode,
@@ -176,7 +176,7 @@ public class MultilingualAccommodationMapper
             foreach (var description in hotelDetails.Descriptions)
             {
                 if (DescriptionTypes.Contains(description.Type))
-                    multilingualDescription.TrySetValue(Constants.DefaultLanguageCode, description.Value);
+                    multilingualDescription.TrySetValue(Common.Constants.DefaultLanguageCode, description.Value);
             }
 
             multilingualTextualDescription.Add(new MultilingualTextualDescription(TextualDescriptionTypes.General, multilingualDescription));
