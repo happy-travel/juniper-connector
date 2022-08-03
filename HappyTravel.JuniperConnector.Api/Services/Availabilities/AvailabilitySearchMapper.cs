@@ -21,6 +21,12 @@ public class AvailabilitySearchMapper
     }
 
 
+    /// <summary>
+    /// Availability response mapping
+    /// </summary>
+    /// <param name="availabilityRequest">Availability request</param>
+    /// <param name="responses">List of availability responses from the supplier</param>
+    /// <returns></returns>
     public async Task<Availability> MapToAvailability(AvailabilityRequest availabilityRequest, List<JP_Results> responses)
     {
         var hotelResults = responses.SelectMany(r => r.Items)

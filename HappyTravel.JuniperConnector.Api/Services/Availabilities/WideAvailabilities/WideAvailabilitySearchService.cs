@@ -25,6 +25,12 @@ public class WideAvailabilitySearchService : IWideAvailabilitySearchService
     }
 
 
+    /// <summary>
+    /// Searches for accommodations with available room contract sets. The 1st search step.
+    /// </summary>
+    /// <param name="request">Availability search request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
     public async Task<Result<Availability>> Get(AvailabilityRequest request, string languageCode, CancellationToken cancellationToken)
     {
         var accommodations = await GetAccommodations();

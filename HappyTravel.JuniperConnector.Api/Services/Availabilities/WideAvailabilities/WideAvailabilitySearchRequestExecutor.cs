@@ -14,6 +14,12 @@ public class WideAvailabilitySearchRequestExecutor
     }
 
 
+    /// <summary>
+    /// Sends search queries to the supplier's API. If the number of hotel IDs is greater than MaxAllowedHotelCodes, then the request is divided into smaller requests
+    /// </summary>
+    /// <param name="request">Availability request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
     public async Task<Result<List<JP_Results>>> GetHotelResults(AvailabilityRequest request, CancellationToken cancellationToken)
     {
         var accommodationIds = request.AccommodationIds;

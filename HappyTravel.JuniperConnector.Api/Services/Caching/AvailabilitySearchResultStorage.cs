@@ -15,15 +15,33 @@ public class AvailabilitySearchResultStorage
     }
 
 
+    /// <summary>
+    /// Retrieving CachedAccommodationAvailability from the cache by accommodation id
+    /// </summary>
+    /// <param name="availabilityId">Availability id</param>
+    /// <param name="accommodationId">Accommodation id</param>
+    /// <returns></returns>
     public async Task<Result<CachedAccommodationAvailability>> GetByAccommodationId(string availabilityId, string accommodationId)
       => await GetCachedData(BuildKey(availabilityId), a => a.AccommodationId == accommodationId);
 
 
+    /// <summary>
+    /// Retrieving CachedAccommodationAvailability from the cache by room contract set id
+    /// </summary>
+    /// <param name="availabilityId">Availability id</param>
+    /// <param name="roomContractSetId">Room contract set id</param>
+    /// <returns></returns>
     public async Task<Result<CachedAccommodationAvailability>> GetByRoomContractSetId(string availabilityId, Guid roomContractSetId)
         => await GetCachedData(BuildKey(availabilityId), a => a.CachedRoomContractSets
             .Any(r => r.Id == roomContractSetId));
 
 
+    /// <summary>
+    /// Caching a list of CachedAccommodationAvailability
+    /// </summary>
+    /// <param name="availabilityId">Availability id</param>
+    /// <param name="data">List of CachedAccommodationAvailability</param>
+    /// <returns></returns>
     public Task Set(string availabilityId, List<CachedAccommodationAvailability> data)
         => _flow.SetAsync(BuildKey(availabilityId), data, RequestCacheLifeTime);
 

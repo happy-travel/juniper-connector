@@ -4,7 +4,6 @@ using HappyTravel.EdoContracts.Accommodations.Internals;
 using HappyTravel.Geography;
 using HappyTravel.JuniperConnector.Common;
 using HappyTravel.JuniperConnector.Common.Infrastructure;
-using HappyTravel.JuniperConnector.Data;
 using HappyTravel.JuniperConnector.Data.Models;
 using HappyTravel.MultiLanguage;
 using JuniperServiceReference;
@@ -68,7 +67,9 @@ public class MultilingualAccommodationMapper
     {
         var multilingualCategory = new MultiLanguage<string>();
 
-        multilingualCategory.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails?.HotelCategory.Value);
+        var hotelCategory = hotelDetails.HotelCategory?.Value;
+        if (hotelCategory is not null)
+            multilingualCategory.TrySetValue(Common.Constants.DefaultLanguageCode, hotelCategory);
 
         return multilingualCategory;
     }
@@ -86,15 +87,20 @@ public class MultilingualAccommodationMapper
 
 
     private static AccommodationRatings GetRating(JP_HotelContent hotelDetails)
-            => hotelDetails.HotelCategory.Type switch
-            {
-                "1est" => AccommodationRatings.OneStar,
-                "2est" => AccommodationRatings.TwoStars,
-                "3est" => AccommodationRatings.ThreeStars,
-                "4est" => AccommodationRatings.FourStars,
-                "5est" => AccommodationRatings.FiveStars,
-                _ => AccommodationRatings.NotRated
-            };
+    {
+        var hotelCategoryType = hotelDetails.HotelCategory?.Type;
+
+        return hotelCategoryType switch
+        {
+            "1est" => AccommodationRatings.OneStar,
+            "2est" => AccommodationRatings.TwoStars,
+            "3est" => AccommodationRatings.ThreeStars,
+            "4est" => AccommodationRatings.FourStars,
+            "5est" => AccommodationRatings.FiveStars,
+            _ => AccommodationRatings.NotRated
+        };
+    }
+    
 
 
     static List<ImageInfo> GetImages(JP_HotelContent data)
@@ -109,8 +115,9 @@ public class MultilingualAccommodationMapper
         multilingualLocalityName.TrySetValue(Common.Constants.DefaultLanguageCode, locality);
 
         var multilingualAddress = new MultiLanguage<string>();
-
-        multilingualAddress.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails.Address.Address ?? string.Empty);
+        var address = hotelDetails.Address?.Address;
+        if (address is not null)
+            multilingualAddress.TrySetValue(Common.Constants.DefaultLanguageCode, hotelDetails.Address.Address);
 
         var multilingualCountry = new MultiLanguage<string>();
 
@@ -118,7 +125,7 @@ public class MultilingualAccommodationMapper
 
         var multilingualCountryCode = Common.Constants.VisibleCultures.FirstOrDefault(x => x.Value == country).Key;        
 
-        var coordinates = GetPoint(hotelDetails.Address.Latitude, hotelDetails.Address.Longitude);
+        var coordinates = GetPoint(hotelDetails.Address?.Latitude, hotelDetails.Address?.Longitude);
 
         var multilingualZone = new MultiLanguage<string>();
 
@@ -142,10 +149,16 @@ public class MultilingualAccommodationMapper
     }
 
 
-    private static GeoPoint GetPoint(string latitudeString, string longitudeString)
-            => double.TryParse(latitudeString.Replace('.', ','), out double latitude) && double.TryParse(longitudeString.Replace('.', ','), out double longitude)
+    private static GeoPoint GetPoint(string? latitudeString, string? longitudeString)
+    {
+        if (latitudeString is null || longitudeString is null)
+            return new GeoPoint(0, 0);
+
+        return double.TryParse(latitudeString.Replace('.', ','), out double latitude) && double.TryParse(longitudeString.Replace('.', ','), out double longitude)
             ? new GeoPoint(latitude, longitude)
             : new GeoPoint(0, 0);
+    }
+       
 
 
     private static ScheduleInfo GetSchedule(JP_HotelContent hotelDetails)

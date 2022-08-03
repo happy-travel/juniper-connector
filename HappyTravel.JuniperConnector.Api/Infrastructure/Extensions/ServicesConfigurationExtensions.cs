@@ -26,6 +26,11 @@ namespace HappyTravel.JuniperConnector.Api.Infrastructure.Extensions;
 
 public static class ServicesConfigurationExtensions
 {
+    /// <summary>
+    /// Application configuration
+    /// </summary>
+    /// <param name="builder">A builder for web applications and services</param>
+    /// <exception cref="Exception"></exception>
     public static void ConfigureServices(this WebApplicationBuilder builder)
     {
         using var vaultClient = new VaultClient.VaultClient(new VaultOptions

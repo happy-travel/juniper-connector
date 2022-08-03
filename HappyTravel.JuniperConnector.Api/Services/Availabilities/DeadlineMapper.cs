@@ -6,6 +6,14 @@ namespace HappyTravel.JuniperConnector.Api.Services.Availabilities;
 
 public static class DeadlineMapper
 {
+    /// <summary>
+    /// Deadline mapping.
+    /// </summary>
+    /// <param name="cancelPolicy">Supplier Cancellation Policy</param>
+    /// <param name="checkInDate">Check in date</param>
+    /// <param name="totalGrossPrice">Total gross price</param>
+    /// <param name="numberOfNights">Number of nights</param>
+    /// <returns></returns>
     public static Deadline GetDeadline(JP_CancellationPolicyRules cancelPolicy, DateTimeOffset checkInDate, double totalGrossPrice, int numberOfNights)
     {
         if (cancelPolicy is null)
